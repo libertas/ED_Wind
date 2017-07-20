@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=/home/libertas/workspace_sw/STM32F103-MPU6050/Inc
+HeaderPath=/home/libertas/workspace_sw/ED_Wind_103/Inc
 HeaderFiles=FreeRTOSConfig.h;stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;
-SourcePath=/home/libertas/workspace_sw/STM32F103-MPU6050/Src
+SourcePath=/home/libertas/workspace_sw/ED_Wind_103/Src
 SourceFiles=FreeRTOSConfig.h;stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;freertos.c;stm32f1xx_it.c;stm32f1xx_hal_msp.c;main.c;stm32f1xx_hal_timebase_TIM.c;
 
 [PreviousLibFiles]
