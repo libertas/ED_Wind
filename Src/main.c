@@ -78,10 +78,10 @@ osMutexId sl_send_lockHandle;
 osMutexId dl_send_lockHandle;
 osMutexId ph_send_lockHandle;
 
-struct kine_state ks = {0};
-
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+struct kine_state ks = {0};
 
 /* USER CODE END PV */
 
