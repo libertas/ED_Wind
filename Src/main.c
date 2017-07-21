@@ -55,7 +55,7 @@
 
 #include "SimCom.h"
 
-#include "at24c32.h"
+#include "pwm.h"
 #include "mpu6050.h"
 
 /* USER CODE END Includes */
@@ -136,6 +136,11 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   simcom_init(&huart1);
+
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
   /* USER CODE END 2 */
 
@@ -279,7 +284,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 7;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 0;
+  htim2.Init.Period = 10000;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
   {
@@ -418,14 +423,8 @@ void StartDefaultTask(void const * argument)
 
 	  sl_send(0, 0, msg, 12);
 
-	  arduinolcd_write("Hello,World!", 12);
-
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
 	  osDelay(500);
-
-	  at24c32_write(i, "hello", 5);
-	  at24c32_read(i, data, 50);
-	  sl_send(0, 1, data, 50);
   }
   /* USER CODE END 5 */ 
 }
