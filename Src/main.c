@@ -55,8 +55,9 @@
 
 #include "SimCom.h"
 
-#include "pwm.h"
 #include "mpu6050.h"
+#include "pwm.h"
+#include "pid.h"
 
 /* USER CODE END Includes */
 
@@ -72,9 +73,12 @@ DMA_HandleTypeDef hdma_usart1_tx;
 osThreadId defaultTaskHandle;
 osThreadId sendTaskHandle;
 osThreadId receiveTaskHandle;
+osThreadId controlTaskHandle;
 osMutexId sl_send_lockHandle;
 osMutexId dl_send_lockHandle;
 osMutexId ph_send_lockHandle;
+
+struct kine_state ks = {0};
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -91,6 +95,7 @@ static void MX_TIM2_Init(void);
 void StartDefaultTask(void const * argument);
 extern void StartSendTask(void const * argument);
 extern void StartReceiveTask(void const * argument);
+void StartControlTask(void const * argument);
                                     
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
                                 
@@ -181,6 +186,10 @@ int main(void)
   /* definition and creation of receiveTask */
   osThreadDef(receiveTask, StartReceiveTask, osPriorityNormal, 0, 256);
   receiveTaskHandle = osThreadCreate(osThread(receiveTask), NULL);
+
+  /* definition and creation of controlTask */
+  osThreadDef(controlTask, StartControlTask, osPriorityRealtime, 0, 256);
+  controlTaskHandle = osThreadCreate(osThread(controlTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -402,15 +411,8 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN 5 */
-  set_duty(&htim2, TIM_CHANNEL_1, 0.1);
-  set_duty(&htim2, TIM_CHANNEL_2, 0.2);
-  set_duty(&htim2, TIM_CHANNEL_3, 0.3);
-  set_duty(&htim2, TIM_CHANNEL_4, 0.4);
 
   char *msg;
-  struct kine_state ks = {0};
-
-  mpu6050_init(&hi2c1);
 
   /* Infinite loop */
   for(int i = 0;; i++)
@@ -418,7 +420,6 @@ void StartDefaultTask(void const * argument)
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
 	  osDelay(500);
 
-	  ks = mpu6050_get_kine_state(&ks);
 	  msg = (char*)(&(ks.ax));
 
 	  sl_send(0, 0, msg, 12);
@@ -427,6 +428,26 @@ void StartDefaultTask(void const * argument)
 	  osDelay(500);
   }
   /* USER CODE END 5 */ 
+}
+
+/* StartControlTask function */
+void StartControlTask(void const * argument)
+{
+  /* USER CODE BEGIN StartControlTask */
+  set_duty(&htim2, TIM_CHANNEL_1, 0.1);
+  set_duty(&htim2, TIM_CHANNEL_2, 0.2);
+  set_duty(&htim2, TIM_CHANNEL_3, 0.3);
+  set_duty(&htim2, TIM_CHANNEL_4, 0.4);
+
+  mpu6050_init(&hi2c1);
+
+  /* Infinite loop */
+  for(;;)
+  {
+	ks = mpu6050_get_kine_state(&ks);
+    osDelay(1);
+  }
+  /* USER CODE END StartControlTask */
 }
 
 /**
