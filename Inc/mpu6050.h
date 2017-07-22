@@ -38,7 +38,7 @@ struct kine_state {
 	float ax, ay, az;
 };
 
-struct kine_state mpu6050_get_kine_state(struct kine_state *now_state);
+void mpu6050_get_kine_state(struct kine_state *state_now);
 
 void mpu6050_init(I2C_HandleTypeDef *device);
 uint8_t mpu6050_read(uint8_t addr, uint8_t reg);

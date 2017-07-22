@@ -479,10 +479,20 @@ void StartControlTask(void const * argument)
 
   mpu6050_init(&hi2c1);
 
+  uint8_t t = 0;
+
   /* Infinite loop */
   for(;;)
   {
-	ks = mpu6050_get_kine_state(&ks);
+	t++;
+
+	mpu6050_get_kine_state(&ks);
+
+	if(t >= 5) {
+		t = 0;
+		/* Control the motors */
+
+	}
     osDelay(1);
   }
   /* USER CODE END StartControlTask */

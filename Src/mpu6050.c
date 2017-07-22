@@ -1,4 +1,5 @@
 #include "mpu6050.h"
+#include "time.h"
 
 float axd, ayd, azd, wxd, wyd, wzd;
 I2C_HandleTypeDef *mpu6050_i2c_device;
@@ -99,9 +100,10 @@ void mpu6050_set_average_values(void)
 	}
 }
 
-struct kine_state mpu6050_get_kine_state(struct kine_state *now_state)
+void mpu6050_get_kine_state(struct kine_state *result)
 {
-	struct kine_state result;
+	static float lasttime = 0;
+
 	float ax, ay, az;
 	float wx, wy, wz;
 
@@ -113,15 +115,21 @@ struct kine_state mpu6050_get_kine_state(struct kine_state *now_state)
 	wy = mpu6050_get_exact_data(GYRO_YOUT_H);
 	wz = mpu6050_get_exact_data(GYRO_ZOUT_H);
 
-	result.ax = ax * ACCEL_RANGE / 32767;
-	result.ay = ay * ACCEL_RANGE / 32767;
-	result.az = az * ACCEL_RANGE / 32767;
+	float thistime = seconds();
+	float difftime = thistime - lasttime;
+	lasttime = thistime;
 
-	result.wx = wx * GYRO_RANGE / 32767;
-	result.wy = wy * GYRO_RANGE / 32767;
-	result.wz = wz * GYRO_RANGE / 32767;
+	result->x += (result->wx + wx) * 0.5 * difftime;
+	result->y += (result->wy + wy) * 0.5 * difftime;
+	result->z += (result->wz + wz) * 0.5 * difftime;
 
-	return result;
+	result->ax = ax * ACCEL_RANGE / 32767;
+	result->ay = ay * ACCEL_RANGE / 32767;
+	result->az = az * ACCEL_RANGE / 32767;
+
+	result->wx = wx * GYRO_RANGE / 32767;
+	result->wy = wy * GYRO_RANGE / 32767;
+	result->wz = wz * GYRO_RANGE / 32767;
 }
 
 void mpu6050_init(I2C_HandleTypeDef *device)
