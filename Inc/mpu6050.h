@@ -25,14 +25,16 @@
 #define	GYRO_ZOUT_H		0x47
 #define	GYRO_ZOUT_L		0x48
 #define	PWR_MGMT_1		0x6B
-#define	MPU6050SlaveAddress	0xD2
+#define	MPU6050SlaveAddress	0xD0
 
-#define ACCEL_RANGE ((float)(2 * 9.8))
+#define ACCEL_RANGE ((float)(2 * 9.8f))
 #define ACCEL_CONFIG_CMD 0x01
+
+#define GYRO_RANGE ((float)(250.0f / 360.0f * 2 * 3.14159265f))
 
 struct kine_state {
 	float x, y, z;
-	float vx, vy, vz;
+	float wx, wy, wz;
 	float ax, ay, az;
 };
 

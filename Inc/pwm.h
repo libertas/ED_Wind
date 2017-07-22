@@ -8,7 +8,7 @@
 #ifndef PWM_H_
 #define PWM_H_
 
-#define PWM_PERIOD 10000
+#define PWM_PERIOD 1000
 
 #include "stm32f1xx_hal.h"
 
