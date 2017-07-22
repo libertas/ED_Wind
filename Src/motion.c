@@ -48,8 +48,50 @@ void motion_control(float dest_x, float dest_y, struct kine_state *ks)
 	px.set_value = dest_y;
 	vy = pid_realize(&py);
 
-	set_duty(motion_htim, TIM_CHANNEL_1, vx);
-	set_duty(motion_htim, TIM_CHANNEL_2, -vx);
-	set_duty(motion_htim, TIM_CHANNEL_3, vy);
-	set_duty(motion_htim, TIM_CHANNEL_4, -vy);
+	l298n_set(TIM_CHANNEL_1, vx);
+	l298n_set(TIM_CHANNEL_2, -vx);
+	l298n_set(TIM_CHANNEL_3, vy);
+	l298n_set(TIM_CHANNEL_4, -vy);
+}
+
+void l298n_set(uint32_t channel, float duty)
+{
+	const GPIO_TypeDef* port = GPIOB;
+	uint16_t pin_a, pin_b;
+
+	switch(channel) {
+	case TIM_CHANNEL_1:
+		pin_a = GPIO_PIN_3;
+		pin_b = GPIO_PIN_4;
+		break;
+	case TIM_CHANNEL_2:
+		pin_a = GPIO_PIN_5;
+		pin_b = GPIO_PIN_6;
+		break;
+	case TIM_CHANNEL_3:
+		pin_a = GPIO_PIN_12;
+		pin_b = GPIO_PIN_13;
+		break;
+	case TIM_CHANNEL_4:
+		pin_a = GPIO_PIN_14;
+		pin_b = GPIO_PIN_15;
+		break;
+	default:
+		return;
+	}
+
+	if(duty >= 0) {
+		HAL_GPIO_WritePin(port, pin_a, 1);
+		HAL_GPIO_WritePin(port, pin_b, 0);
+	} else {
+		HAL_GPIO_WritePin(port, pin_a, 0);
+		HAL_GPIO_WritePin(port, pin_b, 1);
+		duty = -duty;
+	}
+
+	if(duty > 1) {
+		duty = 1;
+	}
+
+	set_duty(motion_htim, channel, duty);
 }
