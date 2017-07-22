@@ -51,11 +51,13 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */
+#include <math.h>
 #include <string.h>
 
 #include "SimCom.h"
 #include "ServiceLayer.h"
 
+#include "motion.h"
 #include "mpu6050.h"
 #include "pwm.h"
 #include "pid.h"
@@ -145,11 +147,6 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   simcom_init(&huart1);
-
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
   time_init(&htim4);
 
@@ -472,25 +469,27 @@ void StartDefaultTask(void const * argument)
 void StartControlTask(void const * argument)
 {
   /* USER CODE BEGIN StartControlTask */
-  set_duty(&htim2, TIM_CHANNEL_1, 0.1);
-  set_duty(&htim2, TIM_CHANNEL_2, 0.2);
-  set_duty(&htim2, TIM_CHANNEL_3, 0.3);
-  set_duty(&htim2, TIM_CHANNEL_4, 0.4);
 
   mpu6050_init(&hi2c1);
+  motion_init(&htim2);
 
-  uint8_t t = 0;
+  uint8_t counter = 0;
+  float t = 0;
+  float a = 3.14159265 / 4;
 
   /* Infinite loop */
   for(;;)
   {
-	t++;
+	counter++;
 
 	mpu6050_get_kine_state(&ks);
 
-	if(t >= 5) {
-		t = 0;
+	if(counter >= 5) {
+		counter = 0;
+
 		/* Control the motors */
+		t += 0.1f;
+		motion_control(a * sinf(t), 0, &ks);
 	}
     osDelay(1);
   }

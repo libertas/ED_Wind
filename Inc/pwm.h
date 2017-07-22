@@ -12,6 +12,6 @@
 
 #include "stm32f1xx_hal.h"
 
-void set_duty(TIM_HandleTypeDef *htim, uint32_t Channel, float duty);
+inline void set_duty(TIM_HandleTypeDef *htim, uint32_t Channel, float duty);
 
 #endif /* PWM_H_ */
