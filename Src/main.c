@@ -351,7 +351,7 @@ static void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 7;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 1000;
+  htim4.Init.Period = 100;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
   {
@@ -491,7 +491,6 @@ void StartControlTask(void const * argument)
 	if(t >= 5) {
 		t = 0;
 		/* Control the motors */
-
 	}
     osDelay(1);
   }

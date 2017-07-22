@@ -1,7 +1,8 @@
 #include "mpu6050.h"
 #include "time.h"
 
-float axd, ayd, azd, wxd, wyd, wzd;
+//float axd, ayd, azd;
+float wxd, wyd, wzd;
 I2C_HandleTypeDef *mpu6050_i2c_device;
 
 float int2float(signed int i)
@@ -46,17 +47,17 @@ float mpu6050_get_exact_data(uint8_t reg)
 	float result = int2float(mpu6050_get_data(reg));
 	switch(reg)
 	{
-		case ACCEL_XOUT_H:
-			result -= axd;
-			break;
-
-		case ACCEL_YOUT_H:
-			result -= ayd;
-			break;
-
-		case ACCEL_ZOUT_H:
-			result -= azd;
-			break;
+//		case ACCEL_XOUT_H:
+//			result -= axd;
+//			break;
+//
+//		case ACCEL_YOUT_H:
+//			result -= ayd;
+//			break;
+//
+//		case ACCEL_ZOUT_H:
+//			result -= azd;
+//			break;
 
 		case GYRO_XOUT_H:
 			result -= wxd;
@@ -80,9 +81,9 @@ void mpu6050_set_average_values(void)
 {
 	uint16_t i;
 
-	axd = 0;
-	ayd = 0;
-	azd = 0;
+//	axd = 0;
+//	ayd = 0;
+//	azd = 0;
 	wxd = 0;
 	wyd = 0;
 	wzd = 0;
@@ -91,9 +92,9 @@ void mpu6050_set_average_values(void)
 
 	for(i = 0; i < MPU_SUM; i++)
 	{
-		axd += int2float(mpu6050_get_data(ACCEL_XOUT_H)) / MPU_SUM;
-		ayd += int2float(mpu6050_get_data(ACCEL_YOUT_H)) / MPU_SUM;
-		azd += int2float(mpu6050_get_data(ACCEL_ZOUT_H)) / MPU_SUM;
+//		axd += int2float(mpu6050_get_data(ACCEL_XOUT_H)) / MPU_SUM;
+//		ayd += int2float(mpu6050_get_data(ACCEL_YOUT_H)) / MPU_SUM;
+//		azd += int2float(mpu6050_get_data(ACCEL_ZOUT_H)) / MPU_SUM;
 		wxd += int2float(mpu6050_get_data(GYRO_XOUT_H)) / MPU_SUM;
 		wyd += int2float(mpu6050_get_data(GYRO_YOUT_H)) / MPU_SUM;
 		wzd += int2float(mpu6050_get_data(GYRO_ZOUT_H)) / MPU_SUM;
