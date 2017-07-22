@@ -457,10 +457,10 @@ void StartDefaultTask(void const * argument)
 
 	  msg = (char*)(&(ks.x));
 	  sl_send(0, 0, msg, 12);
-	  msg = (char*)(&(ks.wx));
-	  sl_send(0, 0, msg, 12);
-	  msg = (char*)(&(ks.ax));
-	  sl_send(0, 0, msg, 12);
+//	  msg = (char*)(&(ks.wx));
+//	  sl_send(0, 0, msg, 12);
+//	  msg = (char*)(&(ks.ax));
+//	  sl_send(0, 0, msg, 12);
 
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
 	  osDelay(500);

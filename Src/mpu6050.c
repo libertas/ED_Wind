@@ -119,9 +119,9 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	float difftime = thistime - lasttime;
 	lasttime = thistime;
 
-	result->x += (result->wx + wx) * 0.5 * difftime;
-	result->y += (result->wy + wy) * 0.5 * difftime;
-	result->z += (result->wz + wz) * 0.5 * difftime;
+	result->x += result->wx *difftime;
+	result->y += result->wy *difftime;
+	result->z += result->wz *difftime;
 
 	result->ax = ax * ACCEL_RANGE / 32767;
 	result->ay = ay * ACCEL_RANGE / 32767;

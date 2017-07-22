@@ -30,7 +30,7 @@
 #define ACCEL_RANGE ((float)(2 * 9.8f))
 #define ACCEL_CONFIG_CMD 0x01
 
-#define GYRO_RANGE ((float)(250.0f / 360.0f * 2 * 3.14159265f))
+#define GYRO_RANGE ((float)(2000.0f / 360.0f * 2 * 3.14159265f))
 
 struct kine_state {
 	float x, y, z;
