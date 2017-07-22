@@ -49,8 +49,8 @@ void motion_control(float dest_x, float dest_y, struct kine_state *ks)
 	vy = pid_realize(&py);
 
 	l298n_set(TIM_CHANNEL_1, vx);
-	l298n_set(TIM_CHANNEL_2, -vx);
-	l298n_set(TIM_CHANNEL_3, vy);
+	l298n_set(TIM_CHANNEL_2, vy);
+	l298n_set(TIM_CHANNEL_3, -vx);
 	l298n_set(TIM_CHANNEL_4, -vy);
 }
 
@@ -61,12 +61,12 @@ void l298n_set(uint32_t channel, float duty)
 
 	switch(channel) {
 	case TIM_CHANNEL_1:
-		pin_a = GPIO_PIN_3;
-		pin_b = GPIO_PIN_4;
+		pin_a = GPIO_PIN_1;
+		pin_b = GPIO_PIN_3;
 		break;
 	case TIM_CHANNEL_2:
-		pin_a = GPIO_PIN_5;
-		pin_b = GPIO_PIN_6;
+		pin_a = GPIO_PIN_4;
+		pin_b = GPIO_PIN_5;
 		break;
 	case TIM_CHANNEL_3:
 		pin_a = GPIO_PIN_12;

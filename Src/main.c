@@ -81,6 +81,7 @@ osThreadId controlTaskHandle;
 osMutexId sl_send_lockHandle;
 osMutexId dl_send_lockHandle;
 osMutexId ph_send_lockHandle;
+osMutexId ks_lockHandle;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -164,6 +165,10 @@ int main(void)
   /* definition and creation of ph_send_lock */
   osMutexDef(ph_send_lock);
   ph_send_lockHandle = osMutexCreate(osMutex(ph_send_lock));
+
+  /* definition and creation of ks_lock */
+  osMutexDef(ks_lock);
+  ks_lockHandle = osMutexCreate(osMutex(ks_lock));
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -271,7 +276,7 @@ static void MX_I2C1_Init(void)
 {
 
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -426,7 +431,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
                           |GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC13 */
@@ -435,9 +440,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB2 PB12 PB13 PB14 
+  /*Configure GPIO pins : PB1 PB12 PB13 PB14 
                            PB15 PB3 PB4 PB5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
                           |GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -464,12 +469,16 @@ void StartDefaultTask(void const * argument)
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
 	  osDelay(500);
 
+	  osMutexWait(ks_lockHandle, osWaitForever);
+
 	  msg = (char*)(&(ks.x));
 	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.wx));
 //	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.ax));
 //	  sl_send(0, 0, msg, 12);
+
+	  osMutexRelease(ks_lockHandle);
 
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
 	  osDelay(500);
@@ -487,21 +496,33 @@ void StartControlTask(void const * argument)
 
   uint8_t counter = 0;
   float t = 0;
-  float a = 3.14159265 / 4;
+//  const float final_a = 3.14159265 / 4;
+  const float final_a = 3.14159265 / 6;
+  float a = 0.05f;
 
   /* Infinite loop */
   for(;;)
   {
 	counter++;
 
+	osMutexWait(ks_lockHandle, osWaitForever);
+
 	mpu6050_get_kine_state(&ks);
 
-	if(counter >= 5) {
+	osMutexRelease(ks_lockHandle);
+
+	if(counter >= 1) {
 		counter = 0;
 
 		/* Control the motors */
-		t += 0.1f;
+		t += 0.02f;
+		if(a < final_a) {
+			a += 0.05f;
+		}
 		motion_control(a * sinf(t), 0, &ks);
+//		motion_control(0, a * sinf(t), &ks);
+//		motion_control(0, a, &ks);
+//		motion_control(0, 0, &ks);
 	}
     osDelay(1);
   }
