@@ -22,13 +22,13 @@ void motion_init(TIM_HandleTypeDef *htim)
 	pid_config(&px);
 	pid_config(&py);
 
-	px.kp = 10;
+	px.kp = 2.0;
 	px.ki = 0;
-	px.kd = 0;
+	px.kd = 3.0;
 
-	py.kp = 10;
+	py.kp = 2.0;
 	py.ki = 0;
-	py.kd = 0;
+	py.kd = 1.0;
 
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_2);

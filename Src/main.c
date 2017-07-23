@@ -196,7 +196,7 @@ int main(void)
   receiveTaskHandle = osThreadCreate(osThread(receiveTask), NULL);
 
   /* definition and creation of controlTask */
-  osThreadDef(controlTask, StartControlTask, osPriorityRealtime, 0, 256);
+  osThreadDef(controlTask, StartControlTask, osPriorityRealtime, 0, 512);
   controlTaskHandle = osThreadCreate(osThread(controlTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -496,11 +496,11 @@ void StartControlTask(void const * argument)
 
   uint8_t counter = 0;
   float t = 0;
-  const float final_a = 3.14159265f / 4;
+//  const float final_a = 3.14159265f / 4;
 //  const float final_a = 3.14159265f / 6;
-  float a = final_a;
+  float a = 3.14159265f * 20 / 180;
 
-  const float T = 1.41f;
+  const float T = 1.63f;
 
   /* Infinite loop */
   for(;;)
@@ -518,8 +518,9 @@ void StartControlTask(void const * argument)
 
 		/* Control the motors */
 		t = seconds() / T * 2 * 3.14159265f;
-//		motion_control(a * sinf(t), 0, &ks);
+		motion_control(a * sinf(t), 0, &ks);
 //		motion_control(0, a * sinf(t), &ks);
+//		motion_control(a * cosf(t), a * sinf(t), &ks);
 //		motion_control(0, 0, &ks);
 	}
     osDelay(1);
