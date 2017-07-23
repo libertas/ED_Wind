@@ -26,8 +26,8 @@ void motion_init(TIM_HandleTypeDef *htim)
 	px.ki = 0;
 	px.kd = 3.0;
 
-	py.kp = 2.0;
-	py.ki = 0;
+	py.kp = 5.0;
+	py.ki = 0.8;
 	py.kd = 1.0;
 
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_1);
