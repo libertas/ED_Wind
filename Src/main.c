@@ -467,7 +467,7 @@ void StartDefaultTask(void const * argument)
   for(int i = 0;; i++)
   {
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
-	  osDelay(500);
+	  osDelay(250);
 
 	  osMutexWait(ks_lockHandle, osWaitForever);
 
@@ -481,7 +481,7 @@ void StartDefaultTask(void const * argument)
 	  osMutexRelease(ks_lockHandle);
 
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
-	  osDelay(500);
+	  osDelay(250);
   }
   /* USER CODE END 5 */ 
 }
@@ -496,9 +496,11 @@ void StartControlTask(void const * argument)
 
   uint8_t counter = 0;
   float t = 0;
-//  const float final_a = 3.14159265 / 4;
-  const float final_a = 3.14159265 / 6;
-  float a = 0.05f;
+//  const float final_a = 3.14159265f / 4;
+  const float final_a = 3.14159265f / 6;
+  float a = final_a;
+
+  const float T = 1.41f;
 
   /* Infinite loop */
   for(;;)
@@ -515,13 +517,9 @@ void StartControlTask(void const * argument)
 		counter = 0;
 
 		/* Control the motors */
-		t += 0.02f;
-		if(a < final_a) {
-			a += 0.05f;
-		}
+		t = seconds() / T * 2 * 3.14159265f;
 		motion_control(a * sinf(t), 0, &ks);
 //		motion_control(0, a * sinf(t), &ks);
-//		motion_control(0, a, &ks);
 //		motion_control(0, 0, &ks);
 	}
     osDelay(1);

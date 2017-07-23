@@ -2,6 +2,7 @@
 #ifndef MPU6050_H_
 #define MPU6050_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "stm32f1xx_hal.h"
@@ -40,7 +41,7 @@ struct kine_state {
 void mpu6050_get_kine_state(struct kine_state *state_now);
 
 void mpu6050_init(I2C_HandleTypeDef *device);
-uint8_t mpu6050_read(uint8_t addr, uint8_t reg);
+bool mpu6050_read(uint8_t addr, uint8_t reg, uint8_t *result);
 signed int mpu6050_get_data(uint8_t reg);
 float mpu6050_get_exact_data(uint8_t reg);
 

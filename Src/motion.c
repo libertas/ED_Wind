@@ -22,11 +22,11 @@ void motion_init(TIM_HandleTypeDef *htim)
 	pid_config(&px);
 	pid_config(&py);
 
-	px.kp = 1;
+	px.kp = 2;
 	px.ki = 0;
 	px.kd = 0;
 
-	py.kp = 1;
+	py.kp = 2;
 	py.ki = 0;
 	py.kd = 0;
 

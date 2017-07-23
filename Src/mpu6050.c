@@ -15,16 +15,20 @@ float int2float(signed int i)
 	}
 	return result;
 }
-uint8_t mpu6050_read(uint8_t addr, uint8_t reg)
+
+bool mpu6050_read(uint8_t addr, uint8_t reg, uint8_t *result)
 {
 	uint8_t data;
 
 	while(HAL_I2C_GetState(mpu6050_i2c_device) != HAL_I2C_STATE_READY && HAL_I2C_GetState(mpu6050_i2c_device) != HAL_I2C_STATE_BUSY_RX);
-	HAL_I2C_Master_Transmit(mpu6050_i2c_device, addr, &reg, 1, -1);
+	if(HAL_I2C_Master_Transmit(mpu6050_i2c_device, addr, &reg, 1, 1) != HAL_OK)
+		return false;
 	while(HAL_I2C_GetState(mpu6050_i2c_device) != HAL_I2C_STATE_READY && HAL_I2C_GetState(mpu6050_i2c_device) != HAL_I2C_STATE_BUSY_TX);
-	HAL_I2C_Master_Receive(mpu6050_i2c_device, addr, &data, 1, -1);
+	if(HAL_I2C_Master_Receive(mpu6050_i2c_device, addr, &data, 1, 1) != HAL_OK)
+		return false;
 
-	return data;
+	*result = data;
+	return true;
 }
 
 uint8_t mpu6050_write(uint8_t addr, uint8_t reg, uint8_t data)
@@ -33,13 +37,20 @@ uint8_t mpu6050_write(uint8_t addr, uint8_t reg, uint8_t data)
 	msg[0] = reg;
 	msg[1] = data;
 	while(HAL_I2C_GetState(mpu6050_i2c_device) != HAL_I2C_STATE_READY && HAL_I2C_GetState(mpu6050_i2c_device) != HAL_I2C_STATE_BUSY_RX);
-	HAL_I2C_Master_Transmit(mpu6050_i2c_device, addr, msg, 2, -1);
+	while(HAL_I2C_Master_Transmit(mpu6050_i2c_device, addr, msg, 2, 1) != HAL_OK);
 	return 0;
 }
 
 signed int mpu6050_get_data(uint8_t reg)
 {
-	return ((uint16_t)mpu6050_read(MPU6050SlaveAddress, reg) << 8) | mpu6050_read(MPU6050SlaveAddress, reg + 1);
+	uint16_t result;
+
+	if(mpu6050_read(MPU6050SlaveAddress, reg, (uint8_t*)(&result) + 1) &&
+			mpu6050_read(MPU6050SlaveAddress, reg + 1, (uint8_t*)(&result))) {
+		return result;
+	} else {
+		return 0;
+	}
 }
 
 float mpu6050_get_exact_data(uint8_t reg)
