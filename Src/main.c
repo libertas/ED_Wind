@@ -86,6 +86,7 @@ osMutexId ks_lockHandle;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
+struct kine_state ksold;
 struct kine_state ks = {0};
 
 /* USER CODE END PV */
@@ -509,6 +510,7 @@ void StartControlTask(void const * argument)
 
 	osMutexWait(ks_lockHandle, osWaitForever);
 
+	ksold = ks;
 	mpu6050_get_kine_state(&ks);
 
 	osMutexRelease(ks_lockHandle);
@@ -519,7 +521,7 @@ void StartControlTask(void const * argument)
 		/* Control the motors */
 		t = seconds() / T * 2 * 3.14159265f;
 //		motion_control(a * sinf(t), 0, &ks);
-		motion_control(0, a * sinf(t), &ks);
+//		motion_control(0, a * sinf(t), &ks);
 //		motion_control(a * cosf(t), a * sinf(t), &ks);
 //		motion_control(0, 0, &ks);
 	}
