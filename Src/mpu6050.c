@@ -138,10 +138,10 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	mpu6050_i2c_device = device;
 
 	mpu6050_write(MPU6050SlaveAddress, PWR_MGMT_1, 0x00);
-	mpu6050_write(MPU6050SlaveAddress, SMPLRT_DIV, 0x07);
+	mpu6050_write(MPU6050SlaveAddress, SMPLRT_DIV, 0x00);
 	mpu6050_write(MPU6050SlaveAddress, CONFIG, 0x06);
 	mpu6050_write(MPU6050SlaveAddress, GYRO_CONFIG, 0x18);
-	mpu6050_write(MPU6050SlaveAddress, ACCEL_CONFIG, ACCEL_CONFIG_CMD);
+	mpu6050_write(MPU6050SlaveAddress, ACCEL_CONFIG, 0x00);
 
 	mpu6050_set_average_values();
 }
