@@ -225,6 +225,6 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 
 	kalmany.K1 = 0.02;
 	kalmany.Q_gyro = 0.01;
-	kalmany.Q_angle = 0.005;
+	kalmany.Q_angle = 0.001;
 	kalmany.R_angle = 0.1;
 }
