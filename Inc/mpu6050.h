@@ -34,6 +34,7 @@
 
 struct kine_state {
 	float x, y, z;
+	float x1, y1;
 	float wx, wy, wz;
 	float ax, ay, az;
 };

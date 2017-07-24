@@ -135,6 +135,28 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	result->y += result->wy * difftime;
 	result->z += result->wz * difftime;
 
+	float cosx1, cosy1;
+	cosx1 = sqrt((ax * ax + az * az) / 9.8f);
+	cosy1 = sqrt((ay * ay + az * az) / 9.8f);
+	if(cosx1 > 1) {
+		result->x1 = result->x;
+	} else {
+		if(ax >= 0) {
+			result->x1 = acos(cosx1);
+		} else {
+			result->x1 = -acos(cosx1);
+		}
+	}
+	if(cosy1 > 1) {
+			result->y1 = result->y;
+		} else {
+			if(ay >= 0) {
+				result->y1 = acos(cosy1);
+			} else {
+				result->y1 = -acos(cosy1);
+			}
+		}
+
 	result->ax = ax * ACCEL_RANGE / 32767;
 	result->ay = ay * ACCEL_RANGE / 32767;
 	result->az = az * ACCEL_RANGE / 32767;
