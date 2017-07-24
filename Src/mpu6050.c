@@ -1,9 +1,14 @@
+#include <math.h>
+
+#include "kalman.h"
 #include "mpu6050.h"
 #include "time.h"
 
 //float axd, ayd, azd;
 float wxd, wyd, wzd;
 I2C_HandleTypeDef *mpu6050_i2c_device;
+
+kalman_t kalmanx, kalmany;
 
 float int2float(signed int i)
 {
@@ -164,6 +169,16 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	result->wx = wx * GYRO_RANGE / 32767;
 	result->wy = wy * GYRO_RANGE / 32767;
 	result->wz = wz * GYRO_RANGE / 32767;
+
+	kalmanx.dt = difftime;
+	kalmany.dt = difftime;
+	kalman_filter(&kalmanx, result->x1, result->wx);
+	kalman_filter(&kalmany, result->y1, result->wy);
+
+	result->x = kalmanx.angle;
+	result->y = kalmany.angle;
+	result->wx = kalmanx.angle_dot;
+	result->wy = kalmany.angle_dot;
 }
 
 void mpu6050_init(I2C_HandleTypeDef *device)
@@ -177,4 +192,10 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	mpu6050_write(MPU6050SlaveAddress, ACCEL_CONFIG, 0x00);
 
 	mpu6050_set_average_values();
+
+	kalman_init(&kalmanx);
+	kalman_init(&kalmany);
+
+	kalmanx.Q_gyro = 0.008;
+	kalmany.Q_gyro = 0.008;
 }
