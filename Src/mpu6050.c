@@ -144,13 +144,21 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	float difftime = thistime - lasttime;
 	lasttime = thistime;
 
-	result->x += result->wx * difftime;
-	result->y += result->wy * difftime;
+//	result->x += result->wx * difftime;
+//	result->y += result->wy * difftime;
 	result->z += result->wz * difftime;
 
+	result->ax = ax * ACCEL_RANGE / 32767;
+	result->ay = ay * ACCEL_RANGE / 32767;
+	result->az = az * ACCEL_RANGE / 32767;
+
+	result->wx = wx * GYRO_RANGE / 32767;
+	result->wy = wy * GYRO_RANGE / 32767;
+	result->wz = wz * GYRO_RANGE / 32767;
+
 	float cosx1, cosy1;
-	cosx1 = sqrt((ax * ax + az * az) / 9.8f);
-	cosy1 = sqrt((ay * ay + az * az) / 9.8f);
+	cosx1 = sqrt(result->ax * result->ax + result->az * result->az) / 9.8f;
+	cosy1 = sqrt(result->ay * result->ay + result->az * result->az) / 9.8f;
 	if(cosx1 > 1) {
 		result->y1 = result->y;
 	} else {
@@ -165,18 +173,10 @@ void mpu6050_get_kine_state(struct kine_state *result)
 		} else {
 			if(ay >= 0) {
 				result->x1 = -acos(cosy1);
-			} else {
-				result->x1 = acos(cosy1);
-			}
+		} else {
+			result->x1 = acos(cosy1);
 		}
-
-	result->ax = ax * ACCEL_RANGE / 32767;
-	result->ay = ay * ACCEL_RANGE / 32767;
-	result->az = az * ACCEL_RANGE / 32767;
-
-	result->wx = wx * GYRO_RANGE / 32767;
-	result->wy = wy * GYRO_RANGE / 32767;
-	result->wz = wz * GYRO_RANGE / 32767;
+	}
 
 	kalmanx.dt = difftime;
 	kalmany.dt = difftime;
@@ -218,13 +218,13 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	kalman_init(&kalmanx);
 	kalman_init(&kalmany);
 
-	kalmanx.K1 = 0.01;
-	kalmanx.Q_gyro = 0.012;
+	kalmanx.K1 = 0.02;
+	kalmanx.Q_gyro = 0.01;
 	kalmanx.Q_angle = 0.001;
-	kalmanx.R_angle = 0.5;
+	kalmanx.R_angle = 0.1;
 
-	kalmany.K1 = 0.01;
-	kalmany.Q_gyro = 0.012;
-	kalmany.Q_angle = 0.001;
-	kalmany.R_angle = 0.5;
+	kalmany.K1 = 0.02;
+	kalmany.Q_gyro = 0.01;
+	kalmany.Q_angle = 0.005;
+	kalmany.R_angle = 0.1;
 }
