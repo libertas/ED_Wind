@@ -8,6 +8,14 @@
 float wxd, wyd, wzd;
 I2C_HandleTypeDef *mpu6050_i2c_device;
 
+float xsi = 0;
+float ysi = 0;
+float zsi = 0;
+float xsum = 0;
+float ysum = 0;
+float zsum = 0;
+
+
 kalman_t kalmanx, kalmany;
 
 float int2float(signed int i)
@@ -104,7 +112,7 @@ void mpu6050_set_average_values(void)
 	wyd = 0;
 	wzd = 0;
 
-	#define MPU_SUM 250
+	#define MPU_SUM 300
 
 	for(i = 0; i < MPU_SUM; i++)
 	{
@@ -144,21 +152,21 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	cosx1 = sqrt((ax * ax + az * az) / 9.8f);
 	cosy1 = sqrt((ay * ay + az * az) / 9.8f);
 	if(cosx1 > 1) {
-		result->x1 = result->x;
+		result->y1 = result->y;
 	} else {
 		if(ax >= 0) {
-			result->x1 = acos(cosx1);
+			result->y1 = -acos(cosx1);
 		} else {
-			result->x1 = -acos(cosx1);
+			result->y1 = acos(cosx1);
 		}
 	}
 	if(cosy1 > 1) {
-			result->y1 = result->y;
+			result->x1 = result->x;
 		} else {
 			if(ay >= 0) {
-				result->y1 = acos(cosy1);
+				result->x1 = -acos(cosy1);
 			} else {
-				result->y1 = -acos(cosy1);
+				result->x1 = acos(cosy1);
 			}
 		}
 
@@ -179,6 +187,20 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	result->y = kalmany.angle;
 	result->wx = kalmanx.angle_dot;
 	result->wy = kalmany.angle_dot;
+
+
+//	float k = 0.1f;
+//	xsum += result->x;
+//	xsi++;
+//	result->x -= k * xsum / xsi;
+//
+//	ysum += result->y;
+//	ysi++;
+//	result->y -= k * ysum / ysi;
+//
+//	zsum += result->z;
+//	zsi++;
+//	result->z -= k * zsum / zsi;
 }
 
 void mpu6050_init(I2C_HandleTypeDef *device)
@@ -196,6 +218,13 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	kalman_init(&kalmanx);
 	kalman_init(&kalmany);
 
-	kalmanx.Q_gyro = 0.008;
-	kalmany.Q_gyro = 0.008;
+	kalmanx.K1 = 0.01;
+	kalmanx.Q_gyro = 0.012;
+	kalmanx.Q_angle = 0.001;
+	kalmanx.R_angle = 0.5;
+
+	kalmany.K1 = 0.01;
+	kalmany.Q_gyro = 0.012;
+	kalmany.Q_angle = 0.001;
+	kalmany.R_angle = 0.5;
 }

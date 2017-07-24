@@ -492,16 +492,20 @@ void StartControlTask(void const * argument)
 {
   /* USER CODE BEGIN StartControlTask */
 
+  osDelay(200);
+
   mpu6050_init(&hi2c1);
   motion_init(&htim2);
+
+  osDelay(200);
 
   uint8_t counter = 0;
   float t = 0;
 //  const float final_a = 3.14159265f / 4;
 //  const float final_a = 3.14159265f / 6;
-  float a = 3.14159265f * 20 / 180;
+  float a = 3.14159265f * 15 / 180;
 
-  const float T = 1.63f;
+  const float T = 1.6f;
 
   /* Infinite loop */
   for(;;)
@@ -521,7 +525,7 @@ void StartControlTask(void const * argument)
 		/* Control the motors */
 		t = seconds() / T * 2 * 3.14159265f;
 //		motion_control(a * sinf(t), 0, &ks);
-		motion_control(0, a * sinf(t), &ks);
+//		motion_control(0, a * sinf(t), &ks);
 //		motion_control(a * cosf(t), a * sinf(t), &ks);
 //		motion_control(0, 0, &ks);
 	}
