@@ -170,11 +170,11 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	}
 	if(cosy1 > 1) {
 			result->x1 = result->x;
-		} else {
-			if(ay >= 0) {
-				result->x1 = -acos(cosy1);
-		} else {
+	} else {
+		if(ay >= 0) {
 			result->x1 = acos(cosy1);
+		} else {
+			result->x1 = -acos(cosy1);
 		}
 	}
 
