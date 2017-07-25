@@ -530,8 +530,9 @@ void StartControlTask(void const * argument)
 
 	osMutexWait(ks_lockHandle, osWaitForever);
 
-	mpu6050_get_kine_state(&ks);
+	mpu6050_update_data();
 	kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+	mpu6050_get_kine_state(&ks);
 
 	osMutexRelease(ks_lockHandle);
 
@@ -541,7 +542,7 @@ void StartControlTask(void const * argument)
 		/* Control the motors */
 		t = seconds() / T * 2 * 3.14159265f;
 //		motion_control(a * sinf(t), 0, &ks);
-//		motion_control(0, a * sinf(t), &ks);
+		motion_control(0, a * sinf(t), &ks);
 //		motion_control(a * cosf(t), a * sinf(t), &ks);
 //		motion_control(0, 0, &ks);
 	}

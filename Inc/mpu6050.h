@@ -50,7 +50,11 @@ float mpu6050_get_exact_data(uint8_t reg);
 
 #ifdef MPU6050_USE_DMA
 
+#define MPU6050_DMA_COUNT 14
+#define MPU6050_DMA_ADDR_START ACCEL_XOUT_H
+
 bool* mpu6050_start_read_dma(uint8_t addr);
+void mpu6050_update_data();
 
 #endif
 

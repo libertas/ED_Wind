@@ -16,7 +16,8 @@ float ysum = 0;
 float zsum = 0;
 
 #ifdef MPU6050_USE_DMA
-uint8_t mpu6050_dma_data[14] = {0};
+uint8_t mpu6050_dma_data[MPU6050_DMA_COUNT] = {0};
+uint8_t mpu6050_data[MPU6050_DMA_COUNT] = {0};
 bool mpu6050_dma_cplt_flag;
 uint8_t mpu6050_dma_data_to_send[1];
 uint8_t mpu6050_dma_addr;
@@ -73,13 +74,14 @@ signed int mpu6050_get_data(uint8_t reg)
 		return 0;
 	}
 #else
-	result = mpu6050_dma_data[reg - ACCEL_XOUT_H] << 8
-			| mpu6050_dma_data[reg - ACCEL_XOUT_H + 1];
+	result = mpu6050_data[reg - MPU6050_DMA_ADDR_START] << 8
+			| mpu6050_data[reg - MPU6050_DMA_ADDR_START + 1];
 	return result;
 #endif
 }
 
 #ifdef MPU6050_USE_DMA
+
 bool* mpu6050_start_read_dma(uint8_t addr)
 {
 	mpu6050_dma_cplt_flag = false;
@@ -93,13 +95,21 @@ bool* mpu6050_start_read_dma(uint8_t addr)
 
 	return &mpu6050_dma_cplt_flag;
 }
+
+void mpu6050_update_data()
+{
+	for(int i = 0; i < MPU6050_DMA_COUNT; i++) {
+		mpu6050_data[i] = mpu6050_dma_data[i];
+	}
+}
+
 #endif
 
 void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
 	if(hi2c == mpu6050_i2c_device) {
 		HAL_I2C_Master_Receive_DMA(mpu6050_i2c_device, mpu6050_dma_addr,\
-				mpu6050_dma_data, 14);
+				mpu6050_dma_data, MPU6050_DMA_COUNT);
 	}
 }
 
@@ -241,20 +251,6 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	result->y = kalmany.angle;
 	result->wx = kalmanx.angle_dot;
 	result->wy = kalmany.angle_dot;
-
-
-//	float k = 0.1f;
-//	xsum += result->x;
-//	xsi++;
-//	result->x -= k * xsum / xsi;
-//
-//	ysum += result->y;
-//	ysi++;
-//	result->y -= k * ysum / ysi;
-//
-//	zsum += result->z;
-//	zsi++;
-//	result->z -= k * zsum / zsi;
 }
 
 void mpu6050_init(I2C_HandleTypeDef *device)
