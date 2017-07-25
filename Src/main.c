@@ -528,10 +528,11 @@ void StartControlTask(void const * argument)
 		}
 	}
 
-	osMutexWait(ks_lockHandle, osWaitForever);
-
 	mpu6050_update_data();
 	kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+
+	osMutexWait(ks_lockHandle, osWaitForever);
+
 	mpu6050_get_kine_state(&ks);
 
 	osMutexRelease(ks_lockHandle);

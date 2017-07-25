@@ -16,8 +16,9 @@ float ysum = 0;
 float zsum = 0;
 
 #ifdef MPU6050_USE_DMA
-uint8_t mpu6050_dma_data[MPU6050_DMA_COUNT] = {0};
 uint8_t mpu6050_data[MPU6050_DMA_COUNT] = {0};
+uint8_t mpu6050_dma_data[MPU6050_DMA_COUNT] = {0};
+float mpu6050_dma_time = 0;
 bool mpu6050_dma_cplt_flag;
 uint8_t mpu6050_dma_data_to_send[1];
 uint8_t mpu6050_dma_addr;
@@ -116,6 +117,7 @@ void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
 	if(hi2c == mpu6050_i2c_device) {
+		mpu6050_dma_time = seconds();
 		mpu6050_dma_cplt_flag = true;
 	}
 }
@@ -178,6 +180,7 @@ void mpu6050_set_average_values(void)
 				flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
 			}
 		}
+		mpu6050_update_data();
 #endif
 
 //		axd += int2float(mpu6050_get_data(ACCEL_XOUT_H)) / MPU_SUM;
@@ -204,7 +207,7 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	wy = mpu6050_get_exact_data(GYRO_YOUT_H);
 	wz = mpu6050_get_exact_data(GYRO_ZOUT_H);
 
-	float thistime = seconds();
+	float thistime = mpu6050_dma_time;
 	float difftime = thistime - lasttime;
 	lasttime = thistime;
 
