@@ -15,6 +15,13 @@ float xsum = 0;
 float ysum = 0;
 float zsum = 0;
 
+#ifdef MPU6050_USE_DMA
+uint8_t mpu6050_dma_data[14] = {0};
+bool mpu6050_dma_cplt_flag;
+uint8_t mpu6050_dma_data_to_send[1];
+uint8_t mpu6050_dma_addr;
+#endif
+
 
 kalman_t kalmanx, kalmany;
 
@@ -58,11 +65,48 @@ signed int mpu6050_get_data(uint8_t reg)
 {
 	uint16_t result;
 
+#ifndef MPU6050_USE_DMA
 	if(mpu6050_read(MPU6050SlaveAddress, reg, (uint8_t*)(&result) + 1) &&
 			mpu6050_read(MPU6050SlaveAddress, reg + 1, (uint8_t*)(&result))) {
 		return result;
 	} else {
 		return 0;
+	}
+#else
+	result = mpu6050_dma_data[reg - ACCEL_XOUT_H] << 8
+			| mpu6050_dma_data[reg - ACCEL_XOUT_H + 1];
+	return result;
+#endif
+}
+
+#ifdef MPU6050_USE_DMA
+bool* mpu6050_start_read_dma(uint8_t addr)
+{
+	mpu6050_dma_cplt_flag = false;
+
+	mpu6050_dma_addr = addr;
+
+	mpu6050_dma_data_to_send[0] = ACCEL_XOUT_H;
+
+	HAL_I2C_Master_Transmit_DMA(mpu6050_i2c_device, addr,\
+			mpu6050_dma_data_to_send, 1);
+
+	return &mpu6050_dma_cplt_flag;
+}
+#endif
+
+void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+	if(hi2c == mpu6050_i2c_device) {
+		HAL_I2C_Master_Receive_DMA(mpu6050_i2c_device, mpu6050_dma_addr,\
+				mpu6050_dma_data, 14);
+	}
+}
+
+void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+	if(hi2c == mpu6050_i2c_device) {
+		mpu6050_dma_cplt_flag = true;
 	}
 }
 
@@ -116,6 +160,16 @@ void mpu6050_set_average_values(void)
 
 	for(i = 0; i < MPU_SUM; i++)
 	{
+#ifdef MPU6050_USE_DMA
+		bool *flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+		while(!(*flag)) {
+			osDelay(1);
+			if(!(*flag)) {
+				flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+			}
+		}
+#endif
+
 //		axd += int2float(mpu6050_get_data(ACCEL_XOUT_H)) / MPU_SUM;
 //		ayd += int2float(mpu6050_get_data(ACCEL_YOUT_H)) / MPU_SUM;
 //		azd += int2float(mpu6050_get_data(ACCEL_ZOUT_H)) / MPU_SUM;

@@ -67,6 +67,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+DMA_HandleTypeDef hdma_i2c1_tx;
+DMA_HandleTypeDef hdma_i2c1_rx;
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim4;
@@ -86,7 +88,6 @@ osMutexId ks_lockHandle;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
-struct kine_state ksold;
 struct kine_state ks = {0};
 
 /* USER CODE END PV */
@@ -407,6 +408,12 @@ static void MX_DMA_Init(void)
   /* DMA1_Channel4_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+  /* DMA1_Channel7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 
 }
 
@@ -507,15 +514,24 @@ void StartControlTask(void const * argument)
 
   const float T = 1.6f;
 
+  bool *kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+
   /* Infinite loop */
   for(;;)
   {
 	counter++;
 
+	while(!(*kine_flag)) {
+		osDelay(1);
+		if(!(*kine_flag)) {
+			kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+		}
+	}
+
 	osMutexWait(ks_lockHandle, osWaitForever);
 
-	ksold = ks;
 	mpu6050_get_kine_state(&ks);
+	kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
 
 	osMutexRelease(ks_lockHandle);
 
