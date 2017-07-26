@@ -51,14 +51,28 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */
+
+#include <math.h>
+#include <string.h>
+
+#include "SimCom.h"
+#include "ServiceLayer.h"
+
+#include "motion.h"
+#include "mpu6050.h"
 #include "pwm.h"
+#include "pid.h"
+#include "time.h"
 
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+DMA_HandleTypeDef hdma_i2c1_rx;
+DMA_HandleTypeDef hdma_i2c1_tx;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
@@ -72,15 +86,22 @@ osStaticThreadDef_t sendTaskControlBlock;
 osThreadId receiveTaskHandle;
 uint32_t receiveTaskBuffer[ 256 ];
 osStaticThreadDef_t receiveTaskControlBlock;
+osThreadId controlTaskHandle;
+uint32_t controlTaskBuffer[ 512 ];
+osStaticThreadDef_t controlTaskControlBlock;
 osMutexId sl_send_lockHandle;
 osStaticMutexDef_t sl_send_lockControlBlock;
 osMutexId dl_send_lockHandle;
 osStaticMutexDef_t dl_send_lockControlBlock;
 osMutexId ph_send_lockHandle;
 osStaticMutexDef_t ph_send_lockControlBlock;
+osMutexId ks_lockHandle;
+osStaticMutexDef_t ks_lockControlBlock;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+struct kine_state ks = {0};
 
 /* USER CODE END PV */
 
@@ -91,9 +112,11 @@ static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_TIM13_Init(void);
 void StartDefaultTask(void const * argument);
 extern void StartSendTask(void const * argument);
 extern void StartReceiveTask(void const * argument);
+void StartControlTask(void const * argument);
                                     
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
                                 
@@ -136,14 +159,12 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C1_Init();
   MX_TIM2_Init();
+  MX_TIM13_Init();
 
   /* USER CODE BEGIN 2 */
   simcom_init(&huart1);
 
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
+  time_init(&htim13);
 
   /* USER CODE END 2 */
 
@@ -159,6 +180,10 @@ int main(void)
   /* definition and creation of ph_send_lock */
   osMutexStaticDef(ph_send_lock, &ph_send_lockControlBlock);
   ph_send_lockHandle = osMutexCreate(osMutex(ph_send_lock));
+
+  /* definition and creation of ks_lock */
+  osMutexStaticDef(ks_lock, &ks_lockControlBlock);
+  ks_lockHandle = osMutexCreate(osMutex(ks_lock));
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -184,6 +209,10 @@ int main(void)
   /* definition and creation of receiveTask */
   osThreadStaticDef(receiveTask, StartReceiveTask, osPriorityNormal, 0, 256, receiveTaskBuffer, &receiveTaskControlBlock);
   receiveTaskHandle = osThreadCreate(osThread(receiveTask), NULL);
+
+  /* definition and creation of controlTask */
+  osThreadStaticDef(controlTask, StartControlTask, osPriorityHigh, 0, 512, controlTaskBuffer, &controlTaskControlBlock);
+  controlTaskHandle = osThreadCreate(osThread(controlTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -268,7 +297,7 @@ static void MX_I2C1_Init(void)
 {
 
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -335,6 +364,22 @@ static void MX_TIM2_Init(void)
 
 }
 
+/* TIM13 init function */
+static void MX_TIM13_Init(void)
+{
+
+  htim13.Instance = TIM13;
+  htim13.Init.Prescaler = 15;
+  htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim13.Init.Period = 100;
+  htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+}
+
 /* USART1 init function */
 static void MX_USART1_UART_Init(void)
 {
@@ -361,8 +406,15 @@ static void MX_DMA_Init(void)
 {
   /* DMA controller clock enable */
   __HAL_RCC_DMA2_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+  /* DMA1_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
   /* DMA2_Stream7_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
@@ -390,12 +442,25 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
+                          |GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : PC0 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB1 PB12 PB13 PB14 
+                           PB15 PB3 PB4 PB5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
+                          |GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
@@ -408,22 +473,90 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN 5 */
-  set_duty(&htim2, TIM_CHANNEL_1, 0.1);
-  set_duty(&htim2, TIM_CHANNEL_2, 0.2);
-  set_duty(&htim2, TIM_CHANNEL_3, 0.3);
-  set_duty(&htim2, TIM_CHANNEL_4, 0.4);
+
+  char *msg;
+
+  /* Infinite loop */
+  for(int i = 0;; i++)
+  {
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 0);
+	  osDelay(100);
+
+	  osMutexWait(ks_lockHandle, osWaitForever);
+
+	  msg = (char*)(&(ks.x));
+	  sl_send(0, 0, msg, 12);
+//	  msg = (char*)(&(ks.wx));
+//	  sl_send(0, 0, msg, 12);
+//	  msg = (char*)(&(ks.ax));
+//	  sl_send(0, 0, msg, 12);
+
+	  osMutexRelease(ks_lockHandle);
+
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
+	  osDelay(100);
+  }
+  /* USER CODE END 5 */ 
+}
+
+/* StartControlTask function */
+void StartControlTask(void const * argument)
+{
+  /* USER CODE BEGIN StartControlTask */
+
+  osDelay(200);
+
+  mpu6050_init(&hi2c1);
+  motion_init(&htim2);
+
+  osDelay(200);
+
+  uint8_t counter = 0;
+  float t = 0;
+//  const float final_a = 3.14159265f / 4;
+//  const float final_a = 3.14159265f / 6;
+  float a = 3.14159265f * 15 / 180;
+
+  const float T = 1.6f;
+
+  bool *kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
 
   /* Infinite loop */
   for(;;)
   {
-	  sl_send(1,1,"test", 4);
+	counter++;
+	while(1);
 
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 0);
-	  osDelay(500);
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
-	  osDelay(500);
+	while(!(*kine_flag)) {
+		osDelay(1);
+		if(!(*kine_flag)) {
+			kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+		}
+	}
+
+	mpu6050_update_data();
+	kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+
+	osMutexWait(ks_lockHandle, osWaitForever);
+
+	mpu6050_get_kine_state(&ks);
+
+	osMutexRelease(ks_lockHandle);
+
+	if(counter >= 1) {
+		counter = 0;
+
+		/* Control the motors */
+		t = seconds() / T * 2 * 3.14159265f;
+//		motion_control(a * sinf(t), 0, &ks);
+		motion_control(0, a * sinf(t), &ks);
+//		motion_control(a * cosf(t), a * sinf(t), &ks);
+//		motion_control(0, 0, &ks);
+	}
+	osDelay(1);
   }
-  /* USER CODE END 5 */ 
+
+  /* USER CODE END StartControlTask */
 }
 
 /**
@@ -443,6 +576,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
 /* USER CODE BEGIN Callback 1 */
+
+  if (htim->Instance == TIM13) {
+    time_callback();
+  }
 
 /* USER CODE END Callback 1 */
 }

@@ -8,10 +8,10 @@
 #ifndef PWM_H_
 #define PWM_H_
 
-#define PWM_PERIOD 10000
+#define PWM_PERIOD 1000
 
 #include "stm32f4xx_hal.h"
 
-void set_duty(TIM_HandleTypeDef *htim, uint32_t Channel, float duty);
+inline void set_duty(TIM_HandleTypeDef *htim, uint32_t Channel, float duty);
 
 #endif /* PWM_H_ */
