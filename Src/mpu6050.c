@@ -178,6 +178,7 @@ void mpu6050_set_average_values(void)
 			osDelay(1);
 			if(!(*flag)) {
 				flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+//				sl_send(0,0,"retry", 5);
 			}
 		}
 		mpu6050_update_data();
@@ -266,7 +267,7 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	mpu6050_write(MPU6050SlaveAddress, GYRO_CONFIG, 0x18);
 	mpu6050_write(MPU6050SlaveAddress, ACCEL_CONFIG, 0x00);
 
-//	mpu6050_set_average_values();
+	mpu6050_set_average_values();
 
 	kalman_init(&kalmanx);
 	kalman_init(&kalmany);
