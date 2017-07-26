@@ -484,7 +484,7 @@ void StartDefaultTask(void const * argument)
 
 	  osMutexWait(ks_lockHandle, osWaitForever);
 
-	  msg = (char*)(&(ks.ax));
+	  msg = (char*)(&(ks.x));
 	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.wx));
 //	  sl_send(0, 0, msg, 12);
@@ -519,23 +519,10 @@ void StartControlTask(void const * argument)
 
   const float T = 1.6f;
 
-  bool *kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
-
   /* Infinite loop */
   for(;;)
   {
 	counter++;
-	while(1);
-
-	while(!(*kine_flag)) {
-		osDelay(1);
-		if(!(*kine_flag)) {
-			kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
-		}
-	}
-
-	mpu6050_update_data();
-	kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
 
 	osMutexWait(ks_lockHandle, osWaitForever);
 

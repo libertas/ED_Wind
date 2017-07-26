@@ -7,8 +7,6 @@
 
 #include "stm32f4xx_hal.h"
 
-#define MPU6050_USE_DMA
-
 #define	SMPLRT_DIV		0x19
 #define	CONFIG				0x1A
 #define	GYRO_CONFIG		0x1B
@@ -47,15 +45,5 @@ void mpu6050_init(I2C_HandleTypeDef *device);
 bool mpu6050_read(uint8_t addr, uint8_t reg, uint8_t *result);
 signed int mpu6050_get_data(uint8_t reg);
 float mpu6050_get_exact_data(uint8_t reg);
-
-#ifdef MPU6050_USE_DMA
-
-#define MPU6050_DMA_COUNT 14
-#define MPU6050_DMA_ADDR_START ACCEL_XOUT_H
-
-bool* mpu6050_start_read_dma(uint8_t addr);
-void mpu6050_update_data();
-
-#endif
 
 #endif /* MPU6050_H_ */
