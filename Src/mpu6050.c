@@ -75,8 +75,8 @@ signed int mpu6050_get_data(uint8_t reg)
 		return 0;
 	}
 #else
-	result = mpu6050_data[reg - MPU6050_DMA_ADDR_START] << 8
-			| mpu6050_data[reg - MPU6050_DMA_ADDR_START + 1];
+	result = mpu6050_dma_data[reg - MPU6050_DMA_ADDR_START] << 8
+			| mpu6050_dma_data[reg - MPU6050_DMA_ADDR_START + 1];
 	return result;
 #endif
 }
@@ -178,7 +178,6 @@ void mpu6050_set_average_values(void)
 			osDelay(1);
 			if(!(*flag)) {
 				flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
-//				sl_send(0,0,"retry", 5);
 			}
 		}
 		mpu6050_update_data();

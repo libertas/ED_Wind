@@ -211,7 +211,7 @@ int main(void)
   receiveTaskHandle = osThreadCreate(osThread(receiveTask), NULL);
 
   /* definition and creation of controlTask */
-  osThreadStaticDef(controlTask, StartControlTask, osPriorityHigh, 0, 512, controlTaskBuffer, &controlTaskControlBlock);
+  osThreadStaticDef(controlTask, StartControlTask, osPriorityRealtime, 0, 512, controlTaskBuffer, &controlTaskControlBlock);
   controlTaskHandle = osThreadCreate(osThread(controlTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -484,7 +484,7 @@ void StartDefaultTask(void const * argument)
 
 	  osMutexWait(ks_lockHandle, osWaitForever);
 
-	  msg = (char*)(&(ks.ax));
+	  msg = (char*)(&(ks.x));
 	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.wx));
 //	  sl_send(0, 0, msg, 12);
@@ -525,7 +525,6 @@ void StartControlTask(void const * argument)
   for(;;)
   {
 	counter++;
-	while(1);
 
 	while(!(*kine_flag)) {
 		osDelay(1);
