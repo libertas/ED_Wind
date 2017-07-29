@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=/home/xita/workspace/ED_Wind_103/Inc
+HeaderPath=/home/xita/workspace/ED_Copter_103/Inc
 HeaderFiles=FreeRTOSConfig.h;stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;
-SourcePath=/home/xita/workspace/ED_Wind_103/Src
+SourcePath=/home/xita/workspace/ED_Copter_103/Src
 SourceFiles=FreeRTOSConfig.h;stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;freertos.c;stm32f1xx_it.c;stm32f1xx_hal_msp.c;stm32f1xx_hal_timebase_TIM.c;main.c;
 
 [PreviousLibFiles]
