@@ -59,6 +59,7 @@
 
 #include "motion.h"
 #include "mpu6050.h"
+#include "ppm.h"
 #include "pwm.h"
 #include "pid.h"
 #include "time.h"
@@ -71,6 +72,7 @@ DMA_HandleTypeDef hdma_i2c1_tx;
 DMA_HandleTypeDef hdma_i2c1_rx;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart1;
@@ -100,12 +102,14 @@ static void MX_USART1_UART_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_TIM3_Init(void);
 void StartDefaultTask(void const * argument);
 extern void StartSendTask(void const * argument);
 extern void StartReceiveTask(void const * argument);
 void StartControlTask(void const * argument);
                                     
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+                                
                                 
 
 /* USER CODE BEGIN PFP */
@@ -147,6 +151,7 @@ int main(void)
   MX_TIM2_Init();
   MX_I2C1_Init();
   MX_TIM4_Init();
+  MX_TIM3_Init();
 
   /* USER CODE BEGIN 2 */
   simcom_init(&huart1);
@@ -345,6 +350,48 @@ static void MX_TIM2_Init(void)
 
 }
 
+/* TIM3 init function */
+static void MX_TIM3_Init(void)
+{
+
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 7;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 2000;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 2000;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  HAL_TIM_MspPostInit(&htim3);
+
+}
+
 /* TIM4 init function */
 static void MX_TIM4_Init(void)
 {
@@ -475,20 +522,11 @@ void StartDefaultTask(void const * argument)
   for(int i = 0;; i++)
   {
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
+
 	  osDelay(100);
 
-	  osMutexWait(ks_lockHandle, osWaitForever);
-
-	  msg = (char*)(&(ks.x));
-	  sl_send(0, 0, msg, 12);
-//	  msg = (char*)(&(ks.wx));
-//	  sl_send(0, 0, msg, 12);
-//	  msg = (char*)(&(ks.ax));
-//	  sl_send(0, 0, msg, 12);
-
-	  osMutexRelease(ks_lockHandle);
-
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+
 	  osDelay(100);
   }
   /* USER CODE END 5 */ 
@@ -499,55 +537,16 @@ void StartControlTask(void const * argument)
 {
   /* USER CODE BEGIN StartControlTask */
 
-  osDelay(200);
-
-  mpu6050_init(&hi2c1);
-  motion_init(&htim2);
-
-  osDelay(200);
-
-  uint8_t counter = 0;
-  float t = 0;
-//  const float final_a = 3.14159265f / 4;
-//  const float final_a = 3.14159265f / 6;
-  float a = 3.14159265f * 15 / 180;
-
-  const float T = 1.6f;
-
-  bool *kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+  ppm_init(&htim3);
+  uint16_t pd[PPM_CHANNELS] = {\
+		  1100, 1200, 1300, 1400, 1500,\
+		  1600, 1700, 1800, 1700, 1600};
 
   /* Infinite loop */
   for(;;)
   {
-	counter++;
-
-	while(!(*kine_flag)) {
-		osDelay(1);
-		if(!(*kine_flag)) {
-			kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
-		}
-	}
-
-	mpu6050_update_data();
-	kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
-
-	osMutexWait(ks_lockHandle, osWaitForever);
-
-	mpu6050_get_kine_state(&ks);
-
-	osMutexRelease(ks_lockHandle);
-
-	if(counter >= 1) {
-		counter = 0;
-
-		/* Control the motors */
-		t = seconds() / T * 2 * 3.14159265f;
-//		motion_control(a * sinf(t), 0, &ks);
-		motion_control(0, a * sinf(t), &ks);
-//		motion_control(a * cosf(t), a * sinf(t), &ks);
-//		motion_control(0, 0, &ks);
-	}
-    osDelay(1);
+    osDelay(40);
+    ppm_send(pd);
   }
   /* USER CODE END StartControlTask */
 }
@@ -571,6 +570,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM4) {
     time_callback();
+  }
+
+  if (htim->Instance == TIM3) {
+    ppm_callback();
   }
 
 /* USER CODE END Callback 1 */
