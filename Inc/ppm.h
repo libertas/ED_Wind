@@ -13,10 +13,9 @@
 #include "stm32f1xx_hal.h"
 
 #define PPM_PERIOD 2000
-#define PPM_CHANNELS 10
+#define PPM_CHANNELS 4
 
-void ppm_init(TIM_HandleTypeDef *htim);
-bool ppm_send(uint16_t data[PPM_CHANNELS]);
-void ppm_callback();
+void ppm_init(TIM_HandleTypeDef *htim, uint16_t data[PPM_CHANNELS]);
+void ppm_set(uint16_t data[PPM_CHANNELS]);
 
 #endif /* PPM_H_ */
