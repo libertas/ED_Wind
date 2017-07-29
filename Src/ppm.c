@@ -30,26 +30,37 @@ bool ppm_send(uint16_t data[PPM_CHANNELS])
 
 	ppm_data = data;
 
-	__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_1, PPM_PERIOD - ppm_data[0]);
-	__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_2, PPM_PERIOD - ppm_data[0]);
+	__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_1, 0);
+	__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_2, 0);
 
 	HAL_TIM_OnePulse_Start(ppm_htim, TIM_CHANNEL_1);
 	HAL_TIM_OnePulse_Start(ppm_htim, TIM_CHANNEL_2);
 
-	ppm_counter = 1;
+	ppm_counter = 0;
 
 	return true;
 }
 
 void ppm_callback()
 {
-	if(ppm_counter >= PPM_CHANNELS) {
+	if(ppm_counter == PPM_CHANNELS) {
+		__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_1, 0);
+		__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_2, 0);
+
+		HAL_TIM_OnePulse_Start(ppm_htim, TIM_CHANNEL_1);
+		HAL_TIM_OnePulse_Start(ppm_htim, TIM_CHANNEL_2);
+
+		ppm_counter++;
+
+	} else if(ppm_counter > PPM_CHANNELS) {
+
 		__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_1, PPM_PERIOD);
 		__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_2, PPM_PERIOD);
 		ppm_busy = false;
+
 	} else {
-		__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_1, PPM_PERIOD - ppm_data[ppm_counter]);
-		__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_2, PPM_PERIOD - ppm_data[ppm_counter]);
+		__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_1, ppm_data[ppm_counter]);
+		__HAL_TIM_SET_COMPARE(ppm_htim, TIM_CHANNEL_2, ppm_data[ppm_counter]);
 
 		HAL_TIM_OnePulse_Start(ppm_htim, TIM_CHANNEL_1);
 		HAL_TIM_OnePulse_Start(ppm_htim, TIM_CHANNEL_2);
