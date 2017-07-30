@@ -23,12 +23,13 @@ void mwc_unlock()
 	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_2, 1500);
 	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_3, 1500);
 	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_4, 1500);
-	ppm_set(mwc_aux_htim, TIM_CHANNEL_1, 1000);
+	ppm_set(mwc_aux_htim, TIM_CHANNEL_1, 1500);
 
-	osDelay(500);
+	osDelay(1000);
 
 	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_1, 1000);
 	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_4, 1950);
+	ppm_set(mwc_aux_htim, TIM_CHANNEL_1, 1050);
 
 	osDelay(1000);
 
