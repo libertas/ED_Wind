@@ -543,7 +543,7 @@ void StartControlTask(void const * argument)
 		/* Control the motors */
 		t = seconds() / T * 2 * 3.14159265f;
 //		motion_control(a * sinf(t), 0, &ks);
-//		motion_control(0, a * sinf(t), &ks);
+		motion_control(0, a * sinf(t), &ks);
 //		motion_control(a * cosf(t), a * sinf(t), &ks);
 //		motion_control(0, 0, &ks);
 	}
