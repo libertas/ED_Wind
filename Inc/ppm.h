@@ -15,7 +15,6 @@
 #define PPM_PERIOD 2000
 #define PPM_CHANNELS 4
 
-void ppm_init(TIM_HandleTypeDef *htim, uint16_t data[PPM_CHANNELS]);
-void ppm_set(uint16_t data[PPM_CHANNELS]);
+void ppm_set(TIM_HandleTypeDef *ppm_htim, uint32_t channel, uint16_t count);
 
 #endif /* PPM_H_ */
