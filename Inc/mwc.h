@@ -11,6 +11,7 @@
 #include "stm32f1xx_hal.h"
 
 void mwc_init(TIM_HandleTypeDef *ctrl_htim, TIM_HandleTypeDef *aux_htim);
+void mwc_lock();
 void mwc_unlock();
 void mwc_throttle(uint16_t value);
 void mwc_roll(uint16_t value);

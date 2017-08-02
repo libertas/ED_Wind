@@ -17,21 +17,22 @@ void mwc_init(TIM_HandleTypeDef *ctrl_htim, TIM_HandleTypeDef *aux_htim)
 	mwc_aux_htim = aux_htim;
 }
 
+void mwc_lock()
+{
+	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_1, 1000);
+	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_4, 1000);
+	ppm_set(mwc_aux_htim, TIM_CHANNEL_1, 1050);
+
+	osDelay(2000);
+}
+
 void mwc_unlock()
 {
-	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_1, 1500);
-	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_2, 1500);
-	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_3, 1500);
-	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_4, 1500);
-	ppm_set(mwc_aux_htim, TIM_CHANNEL_1, 1500);
-
-	osDelay(1000);
-
 	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_1, 1000);
 	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_4, 1950);
 	ppm_set(mwc_aux_htim, TIM_CHANNEL_1, 1050);
 
-	osDelay(1000);
+	osDelay(2000);
 
 	ppm_set(mwc_ctrl_htim, TIM_CHANNEL_4, 1500);
 }

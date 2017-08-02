@@ -534,12 +534,26 @@ void StartDefaultTask(void const * argument)
 void StartControlTask(void const * argument)
 {
   /* USER CODE BEGIN StartControlTask */
+
+  osDelay(5000);
   mwc_init(&htim3, &htim2);
+
   mwc_unlock();
+
+  mwc_aux1(1500);
+  mwc_throttle(1600);
+
+  osDelay(5000);
+
+  mwc_aux1(19500);
+
+//  mwc_aux1(1900);
+//  mwc_throttle(1400);
 
   /* Infinite loop */
   for(;;)
   {
+	  osDelay(1);
 
   }
   /* USER CODE END StartControlTask */
