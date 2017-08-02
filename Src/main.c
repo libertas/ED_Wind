@@ -541,8 +541,9 @@ void StartControlTask(void const * argument)
   mwc_unlock();
 
   mwc_aux1(1950);
-  mwc_throttle(1900);
-  mwc_roll(1600);
+  mwc_throttle(1700);
+  mwc_pitch(1500);
+  mwc_roll(1500);
 
   /* Infinite loop */
   for(;;)
