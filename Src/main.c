@@ -438,6 +438,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
@@ -445,6 +446,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
                           |GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC0 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
@@ -461,6 +465,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PD2 PD3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
 }
 
@@ -480,6 +491,8 @@ void StartDefaultTask(void const * argument)
   for(int i = 0;; i++)
   {
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 0);
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0);
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 1);
 	  osDelay(100);
 
 	  osMutexWait(ks_lockHandle, osWaitForever);
@@ -494,6 +507,8 @@ void StartDefaultTask(void const * argument)
 	  osMutexRelease(ks_lockHandle);
 
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 1);
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 0);
 	  osDelay(100);
   }
   /* USER CODE END 5 */ 

@@ -224,8 +224,11 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	result->wz = wz * GYRO_RANGE / 32767;
 
 	float cosx1, cosy1;
-	cosx1 = sqrt(result->ax * result->ax + result->az * result->az) / 9.8f;
-	cosy1 = sqrt(result->ay * result->ay + result->az * result->az) / 9.8f;
+	float g = sqrt(result->ax * result->ax\
+			+ result->ay * result->ay\
+			+ result->az * result->az);
+	cosx1 = sqrt(result->ax * result->ax + result->az * result->az) / g;
+	cosy1 = sqrt(result->ay * result->ay + result->az * result->az) / g;
 	if(cosx1 > 1) {
 		result->y1 = result->y;
 	} else {
