@@ -14,6 +14,7 @@
 #define	CONFIG			0x1A
 #define	GYRO_CONFIG		0x1B
 #define	ACCEL_CONFIG	0x1C
+#define I2C_MST_CTRL	0x24
 #define BYPASS_EN		0x37
 #define	ACCEL_XOUT_H	0x3B
 #define	ACCEL_XOUT_L	0x3C
