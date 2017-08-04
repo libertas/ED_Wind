@@ -16,17 +16,12 @@ float ysum = 0;
 float zsum = 0;
 
 #ifdef MPU6050_USE_DMA
-uint8_t mpu6050_data[MPU6050_DMA_COUNT + AKM8963_DMA_COUNT] = {0};
-uint8_t mpu6050_dma_data[MPU6050_DMA_COUNT + AKM8963_DMA_COUNT] = {0};
+uint8_t mpu6050_data[MPU6050_DMA_COUNT] = {0};
+uint8_t mpu6050_dma_data[MPU6050_DMA_COUNT] = {0};
 float mpu6050_dma_time = 0;
 bool mpu6050_dma_cplt_flag;
 uint8_t mpu6050_dma_data_to_send[1];
 uint8_t mpu6050_dma_addr;
-
-#ifdef MPU6050_USE_MAG
-uint8_t akm8963_dma_data_to_send[1];
-#endif
-
 #endif
 
 
@@ -96,7 +91,6 @@ bool* mpu6050_start_read_dma(uint8_t addr)
 	mpu6050_dma_addr = addr;
 
 	mpu6050_dma_data_to_send[0] = ACCEL_XOUT_H;
-	akm8963_dma_data_to_send[0] = AKM8963_HXL;
 
 	HAL_I2C_Master_Transmit_DMA(mpu6050_i2c_device, addr,\
 			mpu6050_dma_data_to_send, 1);
@@ -106,7 +100,7 @@ bool* mpu6050_start_read_dma(uint8_t addr)
 
 void mpu6050_update_data()
 {
-	for(int i = 0; i < MPU6050_DMA_COUNT + AKM8963_DMA_COUNT; i++) {
+	for(int i = 0; i < MPU6050_DMA_COUNT; i++) {
 		mpu6050_data[i] = mpu6050_dma_data[i];
 	}
 }
@@ -114,37 +108,17 @@ void mpu6050_update_data()
 
 void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
-	static uint8_t count = 0;
-
 	if(hi2c == mpu6050_i2c_device) {
-		if(count == 0) {
-			HAL_I2C_Master_Receive_DMA(mpu6050_i2c_device, mpu6050_dma_addr,\
-					mpu6050_dma_data, MPU6050_DMA_COUNT);
-			count++;
-		} else {
-			HAL_I2C_Master_Receive_DMA(mpu6050_i2c_device, AKM8963SlaveAddress,\
-					mpu6050_dma_data + MPU6050_DMA_COUNT, AKM8963_DMA_COUNT);
-			count = 0;
-		}
+		HAL_I2C_Master_Receive_DMA(mpu6050_i2c_device, mpu6050_dma_addr,\
+				mpu6050_dma_data, MPU6050_DMA_COUNT);
 	}
 }
 
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
-	static uint8_t count = 0;
-
 	if(hi2c == mpu6050_i2c_device) {
-		if(count == 0) {
-			mpu6050_dma_time = seconds();
-
-			HAL_I2C_Master_Transmit_DMA(mpu6050_i2c_device, AKM8963SlaveAddress,\
-					akm8963_dma_data_to_send, 1);
-
-			count++;
-		} else {
-			count = 0;
-			mpu6050_dma_cplt_flag = true;
-		}
+		mpu6050_dma_time = seconds();
+		mpu6050_dma_cplt_flag = true;
 	}
 }
 
@@ -353,15 +327,25 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 
 	mpu6050_write(AKM8963SlaveAddress, AKM8963_CNTL2, 0x01); /* soft reset */
 
-	osDelay(50);
+	osDelay(1);
 
-	mpu6050_write(AKM8963SlaveAddress, AKM8963_CNTL1, 0x10);
+	mpu6050_write(AKM8963SlaveAddress, AKM8963_CNTL1, 0x00);
 
-	osDelay(50);
+	osDelay(1);
 
 	mpu6050_write(AKM8963SlaveAddress, AKM8963_CNTL1, 0x16);
 
-	osDelay(50);
+	osDelay(5);
+
+	/* change to reading mode */
+	mpu6050_write(MPU6050SlaveAddress, BYPASS_EN, 0x00);
+
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_ADDR, 0x8C);
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_REG, AKM8963_HXL);
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x87);
+
+	mpu6050_write(MPU6050SlaveAddress, I2C_MST_CTRL, 0x0D);
+	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 0x20);
 
 #endif
 
