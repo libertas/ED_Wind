@@ -7,7 +7,7 @@
 
 #include "stm32f4xx_hal.h"
 
-//#define MPU6050_USE_DMA
+#define MPU6050_USE_DMA
 #define MPU6050_USE_MAG
 
 #define	SMPLRT_DIV		0x19
@@ -75,11 +75,13 @@ float mpu6050_get_exact_data(uint8_t reg);
 
 #ifdef MPU6050_USE_MAG
 
-#define MPU6050_DMA_COUNT 20
+#define MPU6050_DMA_COUNT 14
+#define AKM8963_DMA_COUNT 6
 
 #else
 
 #define MPU6050_DMA_COUNT 14
+#define AKM8963_DMA_COUNT 0
 
 #endif
 
