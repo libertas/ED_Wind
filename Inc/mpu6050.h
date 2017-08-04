@@ -14,6 +14,7 @@
 #define	CONFIG			0x1A
 #define	GYRO_CONFIG		0x1B
 #define	ACCEL_CONFIG	0x1C
+#define BYPASS_EN		0x37
 #define	ACCEL_XOUT_H	0x3B
 #define	ACCEL_XOUT_L	0x3C
 #define	ACCEL_YOUT_H	0x3D
@@ -32,6 +33,8 @@
 #define	MPU6050SlaveAddress	0xD0
 
 #ifdef MPU6050_USE_MAG
+
+#define	AKM8963SlaveAddress	0x18
 
 #define I2C_SLV0_ADDR 0x25
 #define I2C_SLV0_REG 0x26

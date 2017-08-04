@@ -304,25 +304,26 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 
 #ifdef MPU6050_USE_MAG
 
-	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 0x20);
+
 
 	/* setup AKM8963 */
-	char c;
-	do {
-		mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x81);
-		mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_ADDR, 0x0C);
-		mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_REG, AKM8963_CNTL1);
-		mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_DATA_OUT, 0x16);
-		osDelay(5);
 
-		mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_ADDR, 0x8C);
-		mpu6050_read(MPU6050SlaveAddress, EXT_SENS_DATA, &c);
-	} while(c != 0x16);
+	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 0x00);
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x00);
+	mpu6050_write(MPU6050SlaveAddress, BYPASS_EN, 0x02);
+
+	osDelay(5);
+
+	mpu6050_write(AKM8963SlaveAddress, AKM8963_CNTL1, 0x16);
+
+	osDelay(5);
 
 	/* change to reading mode */
-	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x86);
+	mpu6050_write(MPU6050SlaveAddress, BYPASS_EN, 0x00);
+	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 0x20);
 	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_ADDR, 0x8C);
 	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_REG, AKM8963_HXL);
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x86);
 
 #endif
 
