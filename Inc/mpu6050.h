@@ -76,7 +76,7 @@ float mpu6050_get_exact_data(uint8_t reg);
 #ifdef MPU6050_USE_MAG
 
 #define MPU6050_DMA_COUNT 14
-#define AKM8963_DMA_COUNT 6
+#define AKM8963_DMA_COUNT 7
 
 #else
 

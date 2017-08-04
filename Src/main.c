@@ -496,8 +496,8 @@ void StartDefaultTask(void const * argument)
 
 	  osMutexWait(ks_lockHandle, osWaitForever);
 
-//	  msg = (char*)(&(ks.x));
-//	  sl_send(0, 0, msg, 12);
+	  msg = (char*)(&(ks.x));
+	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.wx));
 //	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.ax));
