@@ -45,6 +45,7 @@
 #define EXT_SENS_DATA 0x49
 
 #define AKM8963_CNTL1 0x0A
+#define AKM8963_CNTL2 0x0B
 #define AKM8963_HXL 0x03
 
 #define MAG_RANGE ((float)(2 * 4000.0f))

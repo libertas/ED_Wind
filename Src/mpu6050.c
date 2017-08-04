@@ -85,6 +85,7 @@ signed int mpu6050_get_data(uint8_t reg)
 
 bool* mpu6050_start_read_dma(uint8_t addr)
 {
+
 	mpu6050_dma_cplt_flag = false;
 
 	mpu6050_dma_addr = addr;
@@ -302,6 +303,10 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 {
 	mpu6050_i2c_device = device;
 
+	mpu6050_write(MPU6050SlaveAddress, PWR_MGMT_1, 0x80);
+
+	osDelay(5);
+
 	mpu6050_write(MPU6050SlaveAddress, PWR_MGMT_1, 0x00);
 	mpu6050_write(MPU6050SlaveAddress, SMPLRT_DIV, 0x00);
 	mpu6050_write(MPU6050SlaveAddress, CONFIG, 0x00);
@@ -319,6 +324,10 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	mpu6050_write(MPU6050SlaveAddress, BYPASS_EN, 0x02);
 
 	osDelay(5);
+
+	mpu6050_write(AKM8963SlaveAddress, AKM8963_CNTL2, 0x01); /* soft reset */
+
+	osDelay(1);
 
 	mpu6050_write(AKM8963SlaveAddress, AKM8963_CNTL1, 0x00);
 
