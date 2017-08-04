@@ -535,13 +535,18 @@ void StartControlTask(void const * argument)
 
   const float T = 1.6f;
 
+
+#ifdef MPU6050_USE_DMA
   bool *kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+#endif
 
   /* Infinite loop */
   for(;;)
   {
 	counter++;
 
+
+#ifdef MPU6050_USE_DMA
 	while(!(*kine_flag)) {
 		osDelay(1);
 		if(!(*kine_flag)) {
@@ -551,6 +556,7 @@ void StartControlTask(void const * argument)
 
 	mpu6050_update_data();
 	kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+#endif
 
 	osMutexWait(ks_lockHandle, osWaitForever);
 

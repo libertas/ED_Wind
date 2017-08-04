@@ -104,7 +104,6 @@ void mpu6050_update_data()
 	}
 }
 
-#endif
 
 void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
@@ -121,6 +120,9 @@ void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 		mpu6050_dma_cplt_flag = true;
 	}
 }
+
+#endif
+
 
 float mpu6050_get_exact_data(uint8_t reg)
 {
@@ -232,7 +234,11 @@ void mpu6050_get_kine_state(struct kine_state *result)
 
 #endif
 
+#ifdef MPU6050_USE_DMA
 	float thistime = mpu6050_dma_time;
+#else
+	float thistime = seconds();
+#endif
 	float difftime = thistime - lasttime;
 	lasttime = thistime;
 
