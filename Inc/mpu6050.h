@@ -7,7 +7,7 @@
 
 #include "stm32f4xx_hal.h"
 
-#define MPU6050_USE_DMA
+//#define MPU6050_USE_DMA
 #define MPU6050_USE_MAG
 
 #define	SMPLRT_DIV		0x19
@@ -48,7 +48,7 @@
 #define AKM8963_CNTL2 0x0B
 #define AKM8963_HXL 0x03
 
-#define MAG_RANGE ((float)(2 * 4000.0f))
+#define MAG_RANGE ((float)(4800.0f))
 
 #endif
 
