@@ -130,17 +130,6 @@ float mpu6050_get_exact_data(uint8_t reg)
 	float result;
 	signed int tmp = mpu6050_get_data(reg);
 
-#ifdef MPU6050_USE_MAG
-
-	if(reg >= EXT_SENS_DATA && reg < EXT_SENS_DATA + 24) {
-		char *p = (char*)(&tmp);
-		p[0] = p[0] ^ p [1];
-		p[1] = p[0] ^ p [1];
-		p[0] = p[0] ^ p [1];
-	}
-
-#endif
-
 	result = int2float(tmp);
 
 	switch(reg)
@@ -342,7 +331,7 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 
 	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_ADDR, 0x8C);
 	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_REG, AKM8963_HXL);
-	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x87);
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0xD7);
 
 	mpu6050_write(MPU6050SlaveAddress, I2C_MST_CTRL, 0x0D);
 	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 0x20);
