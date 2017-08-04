@@ -129,7 +129,7 @@ float mpu6050_get_exact_data(uint8_t reg)
 	float result;
 	signed int tmp = mpu6050_get_data(reg);
 
-#ifdef MPU6050_USE_DMA
+#ifdef MPU6050_USE_MAG
 
 	if(reg >= EXT_SENS_DATA && reg < EXT_SENS_DATA + 24) {
 		char *p = (char*)(&tmp);
