@@ -207,6 +207,16 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	wy = mpu6050_get_exact_data(GYRO_YOUT_H);
 	wz = mpu6050_get_exact_data(GYRO_ZOUT_H);
 
+#ifdef MPU6050_USE_MAG
+
+	float mx, my, mz;
+
+	wx = mpu6050_get_exact_data(EXT_SENS_DATA + 0);
+	wy = mpu6050_get_exact_data(EXT_SENS_DATA + 2);
+	wz = mpu6050_get_exact_data(EXT_SENS_DATA + 4);
+
+#endif
+
 	float thistime = mpu6050_dma_time;
 	float difftime = thistime - lasttime;
 	lasttime = thistime;
@@ -222,6 +232,14 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	result->wx = wx * GYRO_RANGE / 32767;
 	result->wy = wy * GYRO_RANGE / 32767;
 	result->wz = wz * GYRO_RANGE / 32767;
+
+#ifdef MPU6050_USE_MAG
+
+	result->mx = mx * MAG_RANGE / 32767;
+	result->my = my * MAG_RANGE / 32767;
+	result->mz = mz * MAG_RANGE / 32767;
+
+#endif
 
 	float cosx1, cosy1;
 	float g = sqrt(result->ax * result->ax\
@@ -268,6 +286,14 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	mpu6050_write(MPU6050SlaveAddress, CONFIG, 0x00);
 	mpu6050_write(MPU6050SlaveAddress, GYRO_CONFIG, 0x18);
 	mpu6050_write(MPU6050SlaveAddress, ACCEL_CONFIG, 0x00);
+
+#ifdef MPU6050_USE_MAG
+
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_ADDR, 0x98);
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x81);
+	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 020);
+
+#endif
 
 	mpu6050_set_average_values();
 

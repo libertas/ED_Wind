@@ -8,9 +8,10 @@
 #include "stm32f4xx_hal.h"
 
 #define MPU6050_USE_DMA
+#define MPU6050_USE_MAG
 
 #define	SMPLRT_DIV		0x19
-#define	CONFIG				0x1A
+#define	CONFIG			0x1A
 #define	GYRO_CONFIG		0x1B
 #define	ACCEL_CONFIG	0x1C
 #define	ACCEL_XOUT_H	0x3B
@@ -30,15 +31,28 @@
 #define	PWR_MGMT_1		0x6B
 #define	MPU6050SlaveAddress	0xD0
 
+#ifdef MPU6050_USE_MAG
+
+#define I2C_SLV0_ADDR 0x25
+#define I2C_SLV0_REG 0x26
+#define I2C_SLV0_CTRL 0x27
+#define USER_CTRL 0x6A
+#define EXT_SENS_DATA 0x49
+
+#define MAG_RANGE ((float)(2 * 4000.0f))
+
+#endif
+
 #define ACCEL_RANGE ((float)(2 * 9.8f))
 
 #define GYRO_RANGE ((float)(2000.0f / 360.0f * 2 * 3.14159265f))
 
 struct kine_state {
 	float x, y, z;
-	float x1, y1;
+	float x1, y1, z1; /* computed from acc and mag data */
 	float wx, wy, wz;
 	float ax, ay, az;
+	float mx, my, mz;
 };
 
 void mpu6050_get_kine_state(struct kine_state *state_now);
@@ -50,7 +64,16 @@ float mpu6050_get_exact_data(uint8_t reg);
 
 #ifdef MPU6050_USE_DMA
 
+#ifdef MPU6050_USE_MAG
+
+#define MPU6050_DMA_COUNT 20
+
+#else
+
 #define MPU6050_DMA_COUNT 14
+
+#endif
+
 #define MPU6050_DMA_ADDR_START ACCEL_XOUT_H
 
 bool* mpu6050_start_read_dma(uint8_t addr);
