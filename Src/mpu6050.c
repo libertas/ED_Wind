@@ -211,9 +211,9 @@ void mpu6050_get_kine_state(struct kine_state *result)
 
 	float mx, my, mz;
 
-	wx = mpu6050_get_exact_data(EXT_SENS_DATA + 0);
-	wy = mpu6050_get_exact_data(EXT_SENS_DATA + 2);
-	wz = mpu6050_get_exact_data(EXT_SENS_DATA + 4);
+	mx = mpu6050_get_exact_data(EXT_SENS_DATA + 0);
+	my = mpu6050_get_exact_data(EXT_SENS_DATA + 2);
+	mz = mpu6050_get_exact_data(EXT_SENS_DATA + 4);
 
 #endif
 
@@ -291,7 +291,7 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 
 	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_ADDR, 0x98);
 	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x81);
-	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 020);
+	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 0x20);
 
 #endif
 
