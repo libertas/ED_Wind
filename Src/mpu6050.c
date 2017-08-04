@@ -124,7 +124,22 @@ void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 
 float mpu6050_get_exact_data(uint8_t reg)
 {
-	float result = int2float(mpu6050_get_data(reg));
+	float result;
+	signed int tmp = mpu6050_get_data(reg);
+
+#ifdef MPU6050_USE_DMA
+
+	if(reg >= EXT_SENS_DATA && reg < EXT_SENS_DATA + 24) {
+		char *p = (char*)(&tmp);
+		p[0] = p[0] ^ p [1];
+		p[1] = p[0] ^ p [1];
+		p[0] = p[0] ^ p [1];
+	}
+
+#endif
+
+	result = int2float(tmp);
+
 	switch(reg)
 	{
 //		case ACCEL_XOUT_H:
@@ -289,8 +304,9 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 
 #ifdef MPU6050_USE_MAG
 
-	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_ADDR, 0x98);
-	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x81);
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_ADDR, 0x8C);
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_REG, 0x03);
+	mpu6050_write(MPU6050SlaveAddress, I2C_SLV0_CTRL, 0x86);
 	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 0x20);
 
 #endif
