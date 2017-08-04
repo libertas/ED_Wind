@@ -361,6 +361,8 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 
 	mpu6050_write(AKM8963SlaveAddress, AKM8963_CNTL1, 0x16);
 
+	osDelay(50);
+
 #endif
 
 	mpu6050_set_average_values();
