@@ -43,12 +43,12 @@ void flash_verify_err_callback()
 
 static int8_t flash_get_block()
 {
-	uint16_t *p = (uint16_t*)flash_sector_now;
+	uint16_t *p = (uint16_t*)flash_addr_now;
 
 	int i;
 
 	for(i = 0; i < FLASH_BLOCKS_DIV ; i++) {
-		if(*(p + 2) == 0xffff >> i) {
+		if(*(p + 1) == 0xffff >> i) {
 			return i;
 		}
 	}
@@ -82,11 +82,15 @@ void flash_init()
 		flash_sector_next = FLASH_BACK_SECTOR;
 		flash_addr_next = FLASH_BACK_START_ADDR;
 
+		HAL_FLASH_Unlock();
+
 		HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, flash_sector_now, flash_version_code);
 		FLASH_WaitForLastOperation(-1);
 
 		HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, flash_sector_now, ~flash_version_code);
 		FLASH_WaitForLastOperation(-1);
+
+		HAL_FLASH_Lock();
 	}
 }
 
@@ -124,7 +128,6 @@ bool flash_verify(uint32_t sector)
 
 void flash_erase(uint32_t sector)
 {
-	__disable_irq();
 	HAL_FLASH_Unlock();
 
 	FLASH_EraseInitTypeDef f;
@@ -139,11 +142,13 @@ void flash_erase(uint32_t sector)
 	FLASH_WaitForLastOperation(-1);
 
 	HAL_FLASH_Lock();
-	__enable_irq();
 }
 
 static void flash_change_sector(uint16_t addr, uint8_t data[], uint16_t len)
 {
+	sl_send(9, 1, "change sector", 13);
+	osDelay(1);
+
 	for(uint32_t i = 0; i < FLASH_DATA_SIZE; i++) {
 		if(((uint8_t*)flash_addr_next)[i] != 0xff) {
 			flash_erase(flash_sector_next);
@@ -151,9 +156,17 @@ static void flash_change_sector(uint16_t addr, uint8_t data[], uint16_t len)
 		}
 	}
 
+	uint16_t fvc_verify = (((uint16_t)flash_version_code) << 8
+				| flash_version_code) ^ 0xff00;
+
+	HAL_FLASH_Unlock();
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, flash_addr_next, fvc_verify);
+	FLASH_WaitForLastOperation(-1);
+	HAL_FLASH_Lock();
+
 	uint8_t c;
 
-	for(uint32_t i = 0; i < FLASH_DATA_SIZE; i++) {
+	for(uint32_t i = FLASH_SYSTEM_INFO_LEN; i < FLASH_DATA_SIZE; i++) {
 
 		if(i >= addr && i < addr + len) {
 			c = data[i - addr];
@@ -161,8 +174,10 @@ static void flash_change_sector(uint16_t addr, uint8_t data[], uint16_t len)
 			c = ((uint8_t*)flash_addr_now)[i];
 		}
 
+		HAL_FLASH_Unlock();
 		HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, flash_addr_next + i, c);
 		FLASH_WaitForLastOperation(-1);
+		HAL_FLASH_Lock();
 	}
 
 	flash_sector_now = flash_sector_now ^ flash_sector_next;
@@ -174,6 +189,9 @@ static void flash_change_sector(uint16_t addr, uint8_t data[], uint16_t len)
 	flash_addr_now = flash_addr_now ^ flash_addr_next;
 
 	flash_erase(flash_sector_next);
+
+	sl_send(9, 1, "sector changed", 13);
+	osDelay(1);
 }
 
 bool flash_write(uint16_t addr, uint8_t data[], uint16_t len)
@@ -204,20 +222,24 @@ bool flash_write(uint16_t addr, uint8_t data[], uint16_t len)
 		if(block == FLASH_BLOCKS_DIV - 1) {
 			flash_change_sector(addr, data, len);
 		} else {
-			uint8_t c = block;
+			uint16_t c;
 
-			c = c >> 1;
+			c = 0xffff >> block >> 1;
 
-			HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, flash_addr_now + 2, block);
+			HAL_FLASH_Unlock();
+			HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, flash_addr_now + 2, c);
 			FLASH_WaitForLastOperation(-1);
+			HAL_FLASH_Lock();
 
 			flash_write(addr, data, len);
 		}
 
 	} else {
 		for(uint16_t i = 0; i < len; i++) {
+			HAL_FLASH_Unlock();
 			HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, (uint32_t)p + i, data[i]);
 			FLASH_WaitForLastOperation(-1);
+			HAL_FLASH_Lock();
 		}
 	}
 

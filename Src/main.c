@@ -58,6 +58,7 @@
 #include "SimCom.h"
 #include "ServiceLayer.h"
 
+#include "flash.h"
 #include "motion.h"
 #include "mpu6050.h"
 #include "pwm.h"
@@ -165,6 +166,8 @@ int main(void)
   simcom_init(&huart1);
 
   time_init(&htim13);
+
+  flash_init();
 
   /* USER CODE END 2 */
 
