@@ -166,6 +166,7 @@ float mpu6050_get_exact_data(uint8_t reg)
 			result -= wzd;
 			break;
 
+#ifdef MPU6050_USE_MAG
 		case EXT_SENS_DATA + 0:
 			result *= akm8963_asax_k;
 			break;
@@ -177,6 +178,7 @@ float mpu6050_get_exact_data(uint8_t reg)
 		case EXT_SENS_DATA + 4:
 			result *= akm8963_asaz_k;
 			break;
+#endif
 
 		default:
 			break;
