@@ -19,6 +19,13 @@ void callback0(char from, char to, const char* data, SIMCOM_LENGTH_TYPE length)
   sl_send(to,from,data,length);
 }
 
+void callback9_flash(char from, char to, const char* data, SIMCOM_LENGTH_TYPE length)
+{
+	flash_write(0, data, length);
+
+	sl_send(to, from, flash_get_addr(0), length);
+}
+
 void StartSendTask(void const * argument)
 {
   for(;;)
@@ -49,6 +56,7 @@ void StartReceiveTask(void const * argument)
 bool simcom_init(UART_HandleTypeDef *device)
 {
 	sl_config(0, callback0);
+	sl_config(9, callback9_flash);
 
 	uart_device = device;
 
