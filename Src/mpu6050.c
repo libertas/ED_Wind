@@ -24,6 +24,14 @@ uint8_t mpu6050_dma_data_to_send[1];
 uint8_t mpu6050_dma_addr;
 #endif
 
+#ifdef MPU6050_USE_MAG
+
+float akm8963_asax_k = 1;
+float akm8963_asay_k = 1;
+float akm8963_asaz_k = 1;
+
+#endif
+
 
 kalman_t kalmanx, kalmany;
 
@@ -156,6 +164,18 @@ float mpu6050_get_exact_data(uint8_t reg)
 
 		case GYRO_ZOUT_H:
 			result -= wzd;
+			break;
+
+		case EXT_SENS_DATA + 0:
+			result *= akm8963_asax_k;
+			break;
+
+		case EXT_SENS_DATA + 2:
+			result *= akm8963_asay_k;
+			break;
+
+		case EXT_SENS_DATA + 4:
+			result *= akm8963_asaz_k;
 			break;
 
 		default:
@@ -325,6 +345,19 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	mpu6050_write(AKM8963SlaveAddress, AKM8963_CNTL1, 0x16);
 
 	osDelay(5);
+
+
+	/* setup asa values */
+	uint8_t tmp;
+	mpu6050_read(AKM8963SlaveAddress, AKM8963_ASAX, &tmp);
+	akm8963_asax_k = ((float)tmp - 128) * 0.5 / 128 + 1;
+
+	mpu6050_read(AKM8963SlaveAddress, AKM8963_ASAY, &tmp);
+	akm8963_asay_k = ((float)tmp - 128) * 0.5 / 128 + 1;
+
+	mpu6050_read(AKM8963SlaveAddress, AKM8963_ASAZ, &tmp);
+	akm8963_asaz_k = ((float)tmp - 128) * 0.5 / 128 + 1;
+
 
 	/* change to reading mode */
 	mpu6050_write(MPU6050SlaveAddress, BYPASS_EN, 0x00);
