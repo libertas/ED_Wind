@@ -180,10 +180,12 @@ static void flash_change_sector(uint16_t addr, uint8_t data[], uint16_t len)
 										   + i];
 		}
 
-		HAL_FLASH_Unlock();
-		HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, flash_addr_next + FLASH_SYSTEM_INFO_LEN + i, c);
-		FLASH_WaitForLastOperation(-1);
-		HAL_FLASH_Lock();
+		if(*(uint8_t*)(flash_addr_next + FLASH_SYSTEM_INFO_LEN + i) != c) {
+			HAL_FLASH_Unlock();
+			HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, flash_addr_next + FLASH_SYSTEM_INFO_LEN + i, c);
+			FLASH_WaitForLastOperation(-1);
+			HAL_FLASH_Lock();
+		}
 	}
 
 	flash_sector_now = flash_sector_now ^ flash_sector_next;
