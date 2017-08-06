@@ -128,6 +128,8 @@ bool flash_verify(uint32_t sector)
 
 void flash_erase(uint32_t sector)
 {
+	__disable_irq();
+
 	HAL_FLASH_Unlock();
 
 	FLASH_EraseInitTypeDef f;
@@ -142,11 +144,13 @@ void flash_erase(uint32_t sector)
 	FLASH_WaitForLastOperation(-1);
 
 	HAL_FLASH_Lock();
+
+	__enable_irq();
 }
 
 static void flash_change_sector(uint16_t addr, uint8_t data[], uint16_t len)
 {
-	sl_send(9, 1, "change sector", 13);
+	sl_send(9, 1, "change sector...", 17);
 	osDelay(1);
 
 	for(uint32_t i = 0; i < FLASH_DATA_SIZE; i++) {
@@ -166,16 +170,18 @@ static void flash_change_sector(uint16_t addr, uint8_t data[], uint16_t len)
 
 	uint8_t c;
 
-	for(uint32_t i = FLASH_SYSTEM_INFO_LEN; i < FLASH_DATA_SIZE; i++) {
+	for(uint32_t i = 0; i < FLASH_VIRTUAL_SIZE; i++) {
 
 		if(i >= addr && i < addr + len) {
 			c = data[i - addr];
 		} else {
-			c = ((uint8_t*)flash_addr_now)[i];
+			c = ((uint8_t*)flash_addr_now)[FLASH_SYSTEM_INFO_LEN +\
+										   (FLASH_BLOCKS_DIV - 1) * FLASH_VIRTUAL_SIZE\
+										   + i];
 		}
 
 		HAL_FLASH_Unlock();
-		HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, flash_addr_next + i, c);
+		HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, flash_addr_next + FLASH_SYSTEM_INFO_LEN + i, c);
 		FLASH_WaitForLastOperation(-1);
 		HAL_FLASH_Lock();
 	}
@@ -190,7 +196,7 @@ static void flash_change_sector(uint16_t addr, uint8_t data[], uint16_t len)
 
 	flash_erase(flash_sector_next);
 
-	sl_send(9, 1, "sector changed", 13);
+	sl_send(9, 1, "sector changed!", 16);
 	osDelay(1);
 }
 
