@@ -500,22 +500,37 @@ void akm8963_calib()
 	float mmax[3] = {-MAG_RANGE, -MAG_RANGE, -MAG_RANGE};
 	float mmin[3] = {MAG_RANGE, MAG_RANGE, MAG_RANGE};
 	float *ms = &(ks.mx);
+	float lms[3];
 
 	for(int i = 0; i < 300; i++) {
-		osMutexWait(ks_lockHandle, osWaitForever);
-
 		for(int j = 0; j < 3; j++) {
-			if(ms[j] > mmax[j]) {
-				mmax[j] = ms[j];
-			}
-			if(ms[j] < mmin[j]) {
-				mmin[j] = ms[j];
-			}
+			lms[j] = 0;
 		}
 
-		osMutexRelease(ks_lockHandle);
+		for(int k = 0; k < 5; k++) {
+			osMutexWait(ks_lockHandle, osWaitForever);
 
-		osDelay(50);
+			for(int j = 0; j < 3; j++) {
+				lms[j] += ms[j];
+			}
+
+			osMutexRelease(ks_lockHandle);
+
+			osDelay(10);
+		}
+
+
+		for(int j = 0; j < 3; j++) {
+
+			lms[j] /= 5;
+
+			if(lms[j] > mmax[j]) {
+				mmax[j] = lms[j];
+			}
+			if(lms[j] < mmin[j]) {
+				mmin[j] = lms[j];
+			}
+		}
 	}
 
 	mxd = (mmax[0] + mmin[0]) / 2;
