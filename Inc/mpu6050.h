@@ -53,6 +53,8 @@
 
 #define MAG_RANGE ((float)(4800.0f))
 
+#define MAG_CALIB_FLASH_ADDR 0x10
+
 #endif
 
 #define ACCEL_RANGE ((float)(2 * 9.8f))
@@ -73,6 +75,7 @@ void mpu6050_init(I2C_HandleTypeDef *device);
 bool mpu6050_read(uint8_t addr, uint8_t reg, uint8_t *result);
 signed int mpu6050_get_data(uint8_t reg);
 float mpu6050_get_exact_data(uint8_t reg);
+
 
 #ifdef MPU6050_USE_DMA
 

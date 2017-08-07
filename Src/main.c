@@ -483,6 +483,53 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+#ifdef MPU6050_USE_MAG
+
+void akm8963_calib()
+{
+	extern float mxd, myd, mzd, mxs, mys, mzs;
+
+	sl_send(8, 1, "Calibrating", 12);
+
+	const float scale = 60.0f;
+
+	float mmax[3] = {-MAG_RANGE, -MAG_RANGE, -MAG_RANGE};
+	float mmin[3] = {MAG_RANGE, MAG_RANGE, MAG_RANGE};
+	float *ms = &(ks.mx);
+
+	for(int i = 0; i < 300; i++) {
+		osMutexWait(ks_lockHandle, osWaitForever);
+
+		for(int j = 0; j < 3; j++) {
+			if(ms[j] > mmax[j]) {
+				mmax[j] = ms[j];
+			}
+			if(ms[j] < mmin[j]) {
+				mmin[j] = ms[j];
+			}
+		}
+
+		osMutexRelease(ks_lockHandle);
+
+		osDelay(50);
+	}
+
+	mxd = (mmax[0] + mmin[0]) / 2;
+	mxs = scale / ((mmax[0] - mmin[0]) / 2);
+
+	myd = (mmax[1] + mmin[1]) / 2;
+	mys = scale / ((mmax[1] - mmin[1]) / 2);
+
+	mzd = (mmax[2] + mmin[2]) / 2;
+	mzs = scale / ((mmax[2] - mmin[2]) / 2);
+
+	sl_send(8, 1, "Calibrated", 11);
+	sl_send(8, 0, &mxd, 12);
+	sl_send(8, 0, &mxs, 12);
+}
+
+#endif
+
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
@@ -499,12 +546,12 @@ void StartDefaultTask(void const * argument)
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 0);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 1);
-	  osDelay(100);
+	  osDelay(500);
 
 	  osMutexWait(ks_lockHandle, osWaitForever);
 
-	  msg = (char*)(&(ks.x));
-	  sl_send(0, 0, msg, 12);
+//	  msg = (char*)(&(ks.x));
+//	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.wx));
 //	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.ax));
@@ -517,7 +564,7 @@ void StartDefaultTask(void const * argument)
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 0);
-	  osDelay(100);
+	  osDelay(500);
   }
   /* USER CODE END 5 */ 
 }

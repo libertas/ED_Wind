@@ -1,11 +1,16 @@
 #include <math.h>
 
+#include "cmsis_os.h"
+
 #include "kalman.h"
 #include "mpu6050.h"
 #include "time.h"
 
 //float axd, ayd, azd;
 float wxd, wyd, wzd;
+float mxd, myd, mzd;
+float mxs, mys, mzs;
+
 I2C_HandleTypeDef *mpu6050_i2c_device;
 
 float xsi = 0;
@@ -370,6 +375,13 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 
 	mpu6050_write(MPU6050SlaveAddress, I2C_MST_CTRL, 0x0D);
 	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 0x20);
+
+	uint32_t *p = flash_get_addr(MAG_CALIB_FLASH_ADDR);
+	for(int i = 0; i < 3; i++) {
+		if(p[i] != 0xffffffff) {
+			((uint32_t*)(&mxd))[i] = p[i];
+		}
+	}
 
 #endif
 
