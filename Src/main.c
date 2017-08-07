@@ -487,9 +487,13 @@ static void MX_GPIO_Init(void)
 
 void akm8963_calib()
 {
+	extern bool akm8963_calib_flag;
+	akm8963_calib_flag = true;
+
 	extern float mxd, myd, mzd, mxs, mys, mzs;
 
 	sl_send(8, 1, "Calibrating", 12);
+	osDelay(10);
 
 	const float scale = 60.0f;
 
@@ -522,6 +526,8 @@ void akm8963_calib()
 
 	mzd = (mmax[2] + mmin[2]) / 2;
 	mzs = scale / ((mmax[2] - mmin[2]) / 2);
+
+	akm8963_calib_flag = false;
 
 	flash_write(MAG_CALIB_FLASH_ADDR, (uint8_t*)(&mxd), 4);
 	flash_write(MAG_CALIB_FLASH_ADDR + 4, (uint8_t*)(&myd), 4);
@@ -563,14 +569,17 @@ void StartDefaultTask(void const * argument)
 
 	  osMutexWait(ks_lockHandle, osWaitForever);
 
-//	  msg = (char*)(&(ks.x));
-//	  sl_send(0, 0, msg, 12);
-//	  msg = (char*)(&(ks.wx));
-//	  sl_send(0, 0, msg, 12);
-//	  msg = (char*)(&(ks.ax));
-//	  sl_send(0, 0, msg, 12);
-//	  msg = (char*)(&(ks.mx));
-//	  sl_send(0, 0, msg, 12);
+	  extern bool akm8963_calib_flag;
+	  if(!akm8963_calib_flag) {
+//		  msg = (char*)(&(ks.x));
+//		  sl_send(0, 0, msg, 12);
+//		  msg = (char*)(&(ks.wx));
+//		  sl_send(0, 0, msg, 12);
+//		  msg = (char*)(&(ks.ax));
+//		  sl_send(0, 0, msg, 12);
+		  msg = (char*)(&(ks.mx));
+		  sl_send(0, 0, msg, 12);
+	  }
 
 	  osMutexRelease(ks_lockHandle);
 

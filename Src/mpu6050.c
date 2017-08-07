@@ -178,14 +178,29 @@ float mpu6050_get_exact_data(uint8_t reg)
 #ifdef MPU6050_USE_MAG
 		case EXT_SENS_DATA + 0:
 			result *= akm8963_asax_k;
+
+			if(!akm8963_calib_flag) {
+				result = (result - mxd) * mxs;
+			}
+
 			break;
 
 		case EXT_SENS_DATA + 2:
 			result *= akm8963_asay_k;
+
+			if(!akm8963_calib_flag) {
+				result = (result - myd) * mys;
+			}
+
 			break;
 
 		case EXT_SENS_DATA + 4:
 			result *= akm8963_asaz_k;
+
+			if(!akm8963_calib_flag) {
+				result = (result - mzd) * mzs;
+			}
+
 			break;
 #endif
 
