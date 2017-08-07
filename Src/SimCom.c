@@ -28,10 +28,12 @@ void callback9_flash(char from, char to, const char* data, SIMCOM_LENGTH_TYPE le
 
 void akm8963_calib();
 
+#ifdef MPU6050_USE_MAG
 void callback8_calib(char from, char to, const char* data, SIMCOM_LENGTH_TYPE length)
 {
 	akm8963_calib();
 }
+#endif
 
 
 void StartSendTask(void const * argument)
@@ -64,7 +66,11 @@ void StartReceiveTask(void const * argument)
 bool simcom_init(UART_HandleTypeDef *device)
 {
 	sl_config(0, callback0);
+
+#ifdef MPU6050_USE_MAG
 	sl_config(8, callback8_calib);
+#endif
+
 	sl_config(9, callback9_flash);
 
 	uart_device = device;

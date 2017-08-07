@@ -10,6 +10,8 @@
 #define MPU6050_USE_DMA
 #define MPU6050_USE_MAG
 
+#define MPU_SUM 300
+
 #define	SMPLRT_DIV		0x19
 #define	CONFIG			0x1A
 #define	GYRO_CONFIG		0x1B

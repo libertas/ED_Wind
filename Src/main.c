@@ -594,6 +594,8 @@ void StartDefaultTask(void const * argument)
 //		  sl_send(0, 0, msg, 12);
 //		  msg = (char*)(&(ks.mx));
 //		  sl_send(0, 0, msg, 12);
+//		  msg = (char*)(&(ks.x1));
+//		  sl_send(0, 0, msg, 12);
 	  }
 
 	  osMutexRelease(ks_lockHandle);

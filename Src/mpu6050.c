@@ -221,8 +221,6 @@ void mpu6050_set_average_values(void)
 	wyd = 0;
 	wzd = 0;
 
-	#define MPU_SUM 300
-
 	for(i = 0; i < MPU_SUM; i++)
 	{
 #ifdef MPU6050_USE_DMA
@@ -280,7 +278,10 @@ void mpu6050_get_kine_state(struct kine_state *result)
 
 //	result->x += result->wx * difftime;
 //	result->y += result->wy * difftime;
-//	result->z += result->wz * difftime;
+
+#ifndef MPU6050_USE_MAG
+	result->z += result->wz * difftime;
+#endif
 
 	result->ax = ax * ACCEL_RANGE / 32767;
 	result->ay = ay * ACCEL_RANGE / 32767;
@@ -333,8 +334,9 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	result->wx = kalmanx.angle_dot;
 	result->wy = kalmany.angle_dot;
 
-	static float hy_old = 0;
-	static float hx_old = 0;
+#ifdef MPU6050_USE_MAG
+	static float z1d = 0.0f;
+	static uint16_t z1d_count = 0;
 
 	float hy = my * cosf(result->y)\
 			+ mx * sinf(result->y) * sinf(result->x)\
@@ -342,18 +344,28 @@ void mpu6050_get_kine_state(struct kine_state *result)
 
 	float hx = mx * cosf(result->x) + mz * sinf(result->x);
 
-	float hy2 = powf(hy - hy_old, 2);
-	float hx2 = powf(hx - hx_old, 2);
-	result->z1 = acosf(sqrtf(hx2 / (hx2 + hy2)));
+	if(z1d_count < MPU_SUM) {
+		result->z1 = atan2f(hy, hx);
 
-	hy_old = hy;
-	hx_old = hx;
+		z1d += result->z1;
+
+		z1d_count++;
+	} else if(z1d_count == MPU_SUM) {
+		z1d /= MPU_SUM;
+
+		result->z1 = atan2f(hy, hx) - z1d;
+
+		z1d_count++;
+	} else {
+		result->z1 = atan2f(hy, hx) - z1d;
+	}
 
 	kalmanz.dt = difftime;
 	kalman_filter(&kalmanz, result->z1, result->wz);
 
 	result->z = kalmanz.angle;
 	result->wz = kalmanz.angle_dot;
+#endif
 }
 
 void mpu6050_init(I2C_HandleTypeDef *device)
