@@ -42,7 +42,7 @@ float akm8963_asaz_k = 1;
 #endif
 
 
-kalman_t kalmanx, kalmany;
+kalman_t kalmanx, kalmany, kalmanz;
 
 float int2float(signed int i)
 {
@@ -280,7 +280,7 @@ void mpu6050_get_kine_state(struct kine_state *result)
 
 //	result->x += result->wx * difftime;
 //	result->y += result->wy * difftime;
-	result->z += result->wz * difftime;
+//	result->z += result->wz * difftime;
 
 	result->ax = ax * ACCEL_RANGE / 32767;
 	result->ay = ay * ACCEL_RANGE / 32767;
@@ -332,6 +332,28 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	result->y = kalmany.angle;
 	result->wx = kalmanx.angle_dot;
 	result->wy = kalmany.angle_dot;
+
+	static float hy_old = 0;
+	static float hx_old = 0;
+
+	float hy = my * cosf(result->y)\
+			+ mx * sinf(result->y) * sinf(result->x)\
+			- mz * cosf(result->x) * sinf(result->y);
+
+	float hx = mx * cosf(result->x) + mz * sinf(result->x);
+
+	float hy2 = powf(hy - hy_old, 2);
+	float hx2 = powf(hx - hx_old, 2);
+	result->z1 = acosf(sqrtf(hx2 / (hx2 + hy2)));
+
+	hy_old = hy;
+	hx_old = hx;
+
+	kalmanz.dt = difftime;
+	kalman_filter(&kalmanz, result->z1, result->wz);
+
+	result->z = kalmanz.angle;
+	result->wz = kalmanz.angle_dot;
 }
 
 void mpu6050_init(I2C_HandleTypeDef *device)
@@ -439,6 +461,7 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 
 	kalman_init(&kalmanx);
 	kalman_init(&kalmany);
+	kalman_init(&kalmanz);
 
 	kalmanx.K1 = 0.02;
 	kalmanx.Q_gyro = 0.01;
@@ -449,4 +472,9 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	kalmany.Q_gyro = 0.01;
 	kalmany.Q_angle = 0.001;
 	kalmany.R_angle = 0.1;
+
+	kalmanz.K1 = 0.02;
+	kalmanz.Q_gyro = 0.01;
+	kalmanz.Q_angle = 0.001;
+	kalmanz.R_angle = 0.1;
 }

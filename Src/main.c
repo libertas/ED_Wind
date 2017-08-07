@@ -586,14 +586,14 @@ void StartDefaultTask(void const * argument)
 
 	  extern bool akm8963_calib_flag;
 	  if(!akm8963_calib_flag) {
-//		  msg = (char*)(&(ks.x));
-//		  sl_send(0, 0, msg, 12);
+		  msg = (char*)(&(ks.x));
+		  sl_send(0, 0, msg, 12);
 //		  msg = (char*)(&(ks.wx));
 //		  sl_send(0, 0, msg, 12);
 //		  msg = (char*)(&(ks.ax));
 //		  sl_send(0, 0, msg, 12);
-		  msg = (char*)(&(ks.mx));
-		  sl_send(0, 0, msg, 12);
+//		  msg = (char*)(&(ks.mx));
+//		  sl_send(0, 0, msg, 12);
 	  }
 
 	  osMutexRelease(ks_lockHandle);
