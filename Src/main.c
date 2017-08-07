@@ -523,9 +523,22 @@ void akm8963_calib()
 	mzd = (mmax[2] + mmin[2]) / 2;
 	mzs = scale / ((mmax[2] - mmin[2]) / 2);
 
+	flash_write(MAG_CALIB_FLASH_ADDR, (uint8_t*)(&mxd), 4);
+	flash_write(MAG_CALIB_FLASH_ADDR + 4, (uint8_t*)(&myd), 4);
+	flash_write(MAG_CALIB_FLASH_ADDR + 8, (uint8_t*)(&mzd), 4);
+	flash_write(MAG_CALIB_FLASH_ADDR + 12, (uint8_t*)(&mxs), 4);
+	flash_write(MAG_CALIB_FLASH_ADDR + 16, (uint8_t*)(&mys), 4);
+	flash_write(MAG_CALIB_FLASH_ADDR + 20, (uint8_t*)(&mzs), 4);
+
+	osDelay(10);
 	sl_send(8, 1, "Calibrated", 11);
-	sl_send(8, 0, &mxd, 12);
-	sl_send(8, 0, &mxs, 12);
+	sl_send(8, 0, &mxd, 4);
+	sl_send(8, 0, &myd, 4);
+	sl_send(8, 0, &mzd, 4);
+	sl_send(8, 0, &mxs, 4);
+	sl_send(8, 0, &mys, 4);
+	sl_send(8, 0, &mzs, 4);
+	osDelay(10);
 }
 
 #endif
@@ -556,8 +569,8 @@ void StartDefaultTask(void const * argument)
 //	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.ax));
 //	  sl_send(0, 0, msg, 12);
-//	  msg = (char*)(&(ks.mx));
-//	  sl_send(0, 0, msg, 12);
+	  msg = (char*)(&(ks.mx));
+	  sl_send(0, 0, msg, 12);
 
 	  osMutexRelease(ks_lockHandle);
 

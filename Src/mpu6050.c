@@ -6,12 +6,16 @@
 #include "mpu6050.h"
 #include "time.h"
 
+
+I2C_HandleTypeDef *mpu6050_i2c_device;
+
+
 //float axd, ayd, azd;
 float wxd, wyd, wzd;
 float mxd, myd, mzd;
 float mxs, mys, mzs;
 
-I2C_HandleTypeDef *mpu6050_i2c_device;
+bool akm8963_calib_flag = false;
 
 float xsi = 0;
 float ysi = 0;
@@ -377,11 +381,39 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 	mpu6050_write(MPU6050SlaveAddress, USER_CTRL, 0x20);
 
 	uint32_t *p = flash_get_addr(MAG_CALIB_FLASH_ADDR);
-	for(int i = 0; i < 3; i++) {
+
+	int i;
+	for(i = 0; i < 6; i++) {
 		if(p[i] != 0xffffffff) {
-			((uint32_t*)(&mxd))[i] = p[i];
+			continue;
+		} else {
+			break;
 		}
 	}
+
+	if(i == 6) {
+		*(uint32_t*)(&mxd) = p[0];
+		*(uint32_t*)(&myd) = p[1];
+		*(uint32_t*)(&mzd) = p[2];
+		*(uint32_t*)(&mxs) = p[3];
+		*(uint32_t*)(&mys) = p[4];
+		*(uint32_t*)(&mzs) = p[5];
+	} else {
+		mxd = 0.0f;
+		myd = 0.0f;
+		mzd = 0.0f;
+		mxs = 1.0f;
+		mys = 1.0f;
+		mzs = 1.0f;
+	}
+
+	sl_send(8, 1, "Calibrated", 11);
+	sl_send(8, 0, &mxd, 4);
+	sl_send(8, 0, &myd, 4);
+	sl_send(8, 0, &mzd, 4);
+	sl_send(8, 0, &mxs, 4);
+	sl_send(8, 0, &mys, 4);
+	sl_send(8, 0, &mzs, 4);
 
 #endif
 
