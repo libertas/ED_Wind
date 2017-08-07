@@ -239,7 +239,7 @@ bool flash_write(uint16_t addr, uint8_t data[], uint16_t len)
 			FLASH_WaitForLastOperation(-1);
 			HAL_FLASH_Lock();
 
-			uint32_t src = flash_addr_now + FLASH_BLOCKS_DIV + block * FLASH_VIRTUAL_SIZE;
+			uint32_t src = flash_addr_now + FLASH_SYSTEM_INFO_LEN + block * FLASH_VIRTUAL_SIZE;
 			uint32_t dst = src + FLASH_VIRTUAL_SIZE;
 
 			for(uint32_t i = 0; i < FLASH_VIRTUAL_SIZE; i++) {
@@ -247,7 +247,7 @@ bool flash_write(uint16_t addr, uint8_t data[], uint16_t len)
 				if(i >= addr && i < addr + len) {
 					HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, dst + i, data[i - addr]);
 				} else {
-					HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, dst + i, ((uint8_t*)(&src))[i]);
+					HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, dst + i, ((uint8_t*)src)[i]);
 				}
 				FLASH_WaitForLastOperation(-1);
 				HAL_FLASH_Lock();
