@@ -398,6 +398,15 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 		*(uint32_t*)(&mxs) = p[3];
 		*(uint32_t*)(&mys) = p[4];
 		*(uint32_t*)(&mzs) = p[5];
+
+		sl_send(8, 1, "Calibrated", 11);
+
+		sl_send(8, 0, &mxd, 4);
+		sl_send(8, 0, &myd, 4);
+		sl_send(8, 0, &mzd, 4);
+		sl_send(8, 0, &mxs, 4);
+		sl_send(8, 0, &mys, 4);
+		sl_send(8, 0, &mzs, 4);
 	} else {
 		mxd = 0.0f;
 		myd = 0.0f;
@@ -405,15 +414,9 @@ void mpu6050_init(I2C_HandleTypeDef *device)
 		mxs = 1.0f;
 		mys = 1.0f;
 		mzs = 1.0f;
-	}
 
-	sl_send(8, 1, "Calibrated", 11);
-	sl_send(8, 0, &mxd, 4);
-	sl_send(8, 0, &myd, 4);
-	sl_send(8, 0, &mzd, 4);
-	sl_send(8, 0, &mxs, 4);
-	sl_send(8, 0, &mys, 4);
-	sl_send(8, 0, &mzs, 4);
+		sl_send(8, 1, "Not Calibrated", 15);
+	}
 
 #endif
 

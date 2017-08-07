@@ -559,7 +559,7 @@ void StartDefaultTask(void const * argument)
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 0);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 1);
-	  osDelay(500);
+	  osDelay(100);
 
 	  osMutexWait(ks_lockHandle, osWaitForever);
 
@@ -569,15 +569,15 @@ void StartDefaultTask(void const * argument)
 //	  sl_send(0, 0, msg, 12);
 //	  msg = (char*)(&(ks.ax));
 //	  sl_send(0, 0, msg, 12);
-	  msg = (char*)(&(ks.mx));
-	  sl_send(0, 0, msg, 12);
+//	  msg = (char*)(&(ks.mx));
+//	  sl_send(0, 0, msg, 12);
 
 	  osMutexRelease(ks_lockHandle);
 
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 0);
-	  osDelay(500);
+	  osDelay(100);
   }
   /* USER CODE END 5 */ 
 }
