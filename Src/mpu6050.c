@@ -303,26 +303,9 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	float g = sqrt(result->ax * result->ax\
 			+ result->ay * result->ay\
 			+ result->az * result->az);
-	cosx1 = sqrt(result->ax * result->ax + result->az * result->az) / g;
-	cosy1 = sqrt(result->ay * result->ay + result->az * result->az) / g;
-	if(cosx1 > 1) {
-		result->y1 = result->y;
-	} else {
-		if(ax >= 0) {
-			result->y1 = -acos(cosx1);
-		} else {
-			result->y1 = acos(cosx1);
-		}
-	}
-	if(cosy1 > 1) {
-			result->x1 = result->x;
-	} else {
-		if(ay >= 0) {
-			result->x1 = acos(cosy1);
-		} else {
-			result->x1 = -acos(cosy1);
-		}
-	}
+
+	result->y1 = atan2f(result->ax, result->az);
+	result->x1 = atan2f(result->ay, result->az);
 
 	kalmanx.dt = difftime;
 	kalmany.dt = difftime;
