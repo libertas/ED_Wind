@@ -665,10 +665,6 @@ void StartDefaultTask(void const * argument)
 //		  sl_send(0, 0, msg, 12);
 //		  msg = (char*)(&(ks.x1));
 //		  sl_send(0, 0, msg, 12);
-
-		  float dis = sr04_get(0);
-		  msg = (char*)(&dis);
-		  sl_send(0,0,msg,4);
 	  }
 
 	  osMutexRelease(ks_lockHandle);
@@ -765,7 +761,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 /* USER CODE BEGIN Callback 1 */
 
   time_callback(htim);
-  sr04_callback(htim);
 
 /* USER CODE END Callback 1 */
 }

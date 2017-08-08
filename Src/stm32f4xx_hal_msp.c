@@ -289,17 +289,10 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE END TIM3_MspPostInit 0 */
   
     /**TIM3 GPIO Configuration    
-    PB0     ------> TIM3_CH3
-    PC6     ------> TIM3_CH1 
+    PC6     ------> TIM3_CH1
+    PC8     ------> TIM3_CH3 
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_0;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_6;
+    GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -336,14 +329,12 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
     __HAL_RCC_TIM3_CLK_DISABLE();
   
     /**TIM3 GPIO Configuration    
-    PB0     ------> TIM3_CH3
     PC6     ------> TIM3_CH1
     PC7     ------> TIM3_CH2
+    PC8     ------> TIM3_CH3
     PC9     ------> TIM3_CH4 
     */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0);
-
-    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_9);
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9);
 
     /* TIM3 interrupt DeInit */
     HAL_NVIC_DisableIRQ(TIM3_IRQn);

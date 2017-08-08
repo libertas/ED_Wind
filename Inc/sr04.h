@@ -13,6 +13,6 @@
 #define ULTRASONIC_PERIOD 10000
 
 void sr04_init(TIM_HandleTypeDef *htim);
-void sr04_callback();
+float sr04_get(uint8_t channel);
 
 #endif /* SR04_H_ */
