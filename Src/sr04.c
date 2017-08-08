@@ -20,6 +20,10 @@ void sr04_init(TIM_HandleTypeDef *htim)
 	__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, 20);
 	__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_3, 20);
 
+	__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2,\
+			TIM_INPUTCHANNELPOLARITY_RISING);
+
+
 	HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_2);
 	HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_4);
 	HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1);
@@ -28,20 +32,35 @@ void sr04_init(TIM_HandleTypeDef *htim)
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
+	static state = 0;
+
+	static tmp0 = 0;
+
 	if(htim == sr04_htim) {
 		if(__HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_2) != 0) {
-			sr04_count[0] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_2);
-		}
+			if(state == 0) {
+				state++;
 
-		if(__HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_4) != 0) {
-			sr04_count[1] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_4);
+				tmp0 = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_2);
+
+				__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2,\
+						TIM_INPUTCHANNELPOLARITY_FALLING);
+			} else {
+				state = 0;
+
+				sr04_count[0] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_2)\
+						- tmp0;
+
+				tmp0 = 0;
+
+				__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2,\
+						TIM_INPUTCHANNELPOLARITY_RISING);
+			}
 		}
 
 		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, 0);
-		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_4, 0);
 
 		HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_2);
-		HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_4);
 	}
 }
 
