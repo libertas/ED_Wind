@@ -63,6 +63,7 @@
 #include "mpu6050.h"
 #include "pwm.h"
 #include "pid.h"
+#include "sr04.h"
 #include "time.h"
 
 /* USER CODE END Includes */
@@ -73,6 +74,7 @@ DMA_HandleTypeDef hdma_i2c1_rx;
 DMA_HandleTypeDef hdma_i2c1_tx;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart1;
@@ -114,12 +116,14 @@ static void MX_USART1_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM13_Init(void);
+static void MX_TIM3_Init(void);
 void StartDefaultTask(void const * argument);
 extern void StartSendTask(void const * argument);
 extern void StartReceiveTask(void const * argument);
 void StartControlTask(void const * argument);
                                     
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+                                
                                 
 
 /* USER CODE BEGIN PFP */
@@ -161,6 +165,7 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   MX_TIM13_Init();
+  MX_TIM3_Init();
 
   /* USER CODE BEGIN 2 */
   simcom_init(&huart1);
@@ -168,6 +173,8 @@ int main(void)
   time_init(&htim13);
 
   flash_init();
+
+  sr04_init(&htim3);
 
   /* USER CODE END 2 */
 
@@ -327,9 +334,9 @@ static void MX_TIM2_Init(void)
   TIM_OC_InitTypeDef sConfigOC;
 
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 41;
+  htim2.Init.Prescaler = 40;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 10000;
+  htim2.Init.Period = 1000;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
   {
@@ -371,12 +378,74 @@ static void MX_TIM2_Init(void)
 
 }
 
+/* TIM3 init function */
+static void MX_TIM3_Init(void)
+{
+
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+  TIM_IC_InitTypeDef sConfigIC;
+
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 40;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 10000;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_IC_Init(&htim3) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  HAL_TIM_MspPostInit(&htim3);
+
+}
+
 /* TIM13 init function */
 static void MX_TIM13_Init(void)
 {
 
   htim13.Instance = TIM13;
-  htim13.Init.Prescaler = 41;
+  htim13.Init.Prescaler = 40;
   htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim13.Init.Period = 100;
   htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -586,8 +655,8 @@ void StartDefaultTask(void const * argument)
 
 	  extern bool akm8963_calib_flag;
 	  if(!akm8963_calib_flag) {
-		  msg = (char*)(&(ks.x));
-		  sl_send(0, 0, msg, 12);
+//		  msg = (char*)(&(ks.x));
+//		  sl_send(0, 0, msg, 12);
 //		  msg = (char*)(&(ks.wx));
 //		  sl_send(0, 0, msg, 12);
 //		  msg = (char*)(&(ks.ax));
@@ -596,6 +665,10 @@ void StartDefaultTask(void const * argument)
 //		  sl_send(0, 0, msg, 12);
 //		  msg = (char*)(&(ks.x1));
 //		  sl_send(0, 0, msg, 12);
+
+		  float dis = sr04_get(0);
+		  msg = (char*)(&dis);
+		  sl_send(0,0,msg,4);
 	  }
 
 	  osMutexRelease(ks_lockHandle);
@@ -691,9 +764,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
 /* USER CODE BEGIN Callback 1 */
 
-  if (htim->Instance == TIM13) {
-    time_callback();
-  }
+  time_callback(htim);
+  sr04_callback(htim);
 
 /* USER CODE END Callback 1 */
 }

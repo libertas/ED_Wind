@@ -19,9 +19,11 @@ void time_init(TIM_HandleTypeDef *htim)
 	HAL_TIM_Base_Start_IT(htim);
 }
 
-void time_callback()
+void time_callback(TIM_HandleTypeDef *htim)
 {
-	time_counter++;
+	if(htim == time_htim) {
+		time_counter++;
+	}
 }
 
 float micros()
