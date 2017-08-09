@@ -74,7 +74,6 @@ DMA_HandleTypeDef hdma_i2c1_rx;
 DMA_HandleTypeDef hdma_i2c1_tx;
 
 TIM_HandleTypeDef htim2;
-TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart1;
@@ -116,14 +115,12 @@ static void MX_USART1_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM13_Init(void);
-static void MX_TIM3_Init(void);
 void StartDefaultTask(void const * argument);
 extern void StartSendTask(void const * argument);
 extern void StartReceiveTask(void const * argument);
 void StartControlTask(void const * argument);
                                     
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                                
                                 
 
 /* USER CODE BEGIN PFP */
@@ -165,7 +162,6 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   MX_TIM13_Init();
-  MX_TIM3_Init();
 
   /* USER CODE BEGIN 2 */
   simcom_init(&huart1);
@@ -174,7 +170,7 @@ int main(void)
 
   flash_init();
 
-  sr04_init(&htim3);
+  motion_init(&htim2);
 
   /* USER CODE END 2 */
 
@@ -378,68 +374,6 @@ static void MX_TIM2_Init(void)
 
 }
 
-/* TIM3 init function */
-static void MX_TIM3_Init(void)
-{
-
-  TIM_MasterConfigTypeDef sMasterConfig;
-  TIM_OC_InitTypeDef sConfigOC;
-  TIM_IC_InitTypeDef sConfigIC;
-
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 40;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 30000;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  if (HAL_TIM_IC_Init(&htim3) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
-  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
-  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
-  sConfigIC.ICFilter = 0;
-  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  HAL_TIM_MspPostInit(&htim3);
-
-}
-
 /* TIM13 init function */
 static void MX_TIM13_Init(void)
 {
@@ -513,6 +447,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
@@ -522,8 +457,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
-                          |GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
+                          |GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC0 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
@@ -539,14 +474,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB1 PB12 PB13 PB14 
-                           PB15 PB3 PB4 PB5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
-                          |GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+  /*Configure GPIO pins : PE8 PE9 PE10 PE11 
+                           PE12 PE13 PE14 PE15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
+                          |GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 }
 
@@ -651,24 +586,6 @@ void StartDefaultTask(void const * argument)
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 1);
 	  osDelay(100);
 
-	  osMutexWait(ks_lockHandle, osWaitForever);
-
-	  extern bool akm8963_calib_flag;
-	  if(!akm8963_calib_flag) {
-		  msg = (char*)(&(ks.x));
-		  sl_send(0, 0, msg, 12);
-//		  msg = (char*)(&(ks.wx));
-//		  sl_send(0, 0, msg, 12);
-//		  msg = (char*)(&(ks.ax));
-//		  sl_send(0, 0, msg, 12);
-//		  msg = (char*)(&(ks.mx));
-//		  sl_send(0, 0, msg, 12);
-//		  msg = (char*)(&(ks.x1));
-//		  sl_send(0, 0, msg, 12);
-	  }
-
-	  osMutexRelease(ks_lockHandle);
-
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 0);
@@ -684,57 +601,17 @@ void StartControlTask(void const * argument)
 
   osDelay(200);
 
-  mpu6050_init(&hi2c1);
-  motion_init(&htim2);
-
-  osDelay(200);
-
-  uint8_t counter = 0;
-  float t = 0;
-//  const float final_a = 3.14159265f / 4;
-//  const float final_a = 3.14159265f / 6;
-  float a = 3.14159265f * 15 / 180;
-
-  const float T = 1.6f;
-
-
-#ifdef MPU6050_USE_DMA
-  bool *kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
-#endif
+  uint32_t counter = 0;
 
   /* Infinite loop */
   for(;;)
   {
 	counter++;
 
-
-#ifdef MPU6050_USE_DMA
-	while(!(*kine_flag)) {
-		osDelay(1);
-		if(!(*kine_flag)) {
-			kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
-		}
-	}
-
-	mpu6050_update_data();
-	kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
-#endif
-
-	osMutexWait(ks_lockHandle, osWaitForever);
-
-	mpu6050_get_kine_state(&ks);
-
-	osMutexRelease(ks_lockHandle);
-
 	if(counter >= 5) {
 		counter = 0;
 
 		/* Control the motors */
-		t = seconds() / T * 2 * 3.14159265f;
-//		motion_control(a * sinf(t), 0, &ks);
-		motion_control(0, a * sinf(t), &ks);
-//		motion_control(a * cosf(t), a * sinf(t), &ks);
-//		motion_control(0, 0, &ks);
 	}
 	osDelay(1);
   }

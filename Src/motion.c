@@ -56,17 +56,17 @@ void motion_control(float dest_x, float dest_y, struct kine_state *ks)
 
 void l298n_set(uint32_t channel, float duty)
 {
-	const GPIO_TypeDef* port = GPIOB;
+	const GPIO_TypeDef* port = GPIOE;
 	uint16_t pin_a, pin_b;
 
 	switch(channel) {
 	case TIM_CHANNEL_1:
-		pin_a = GPIO_PIN_1;
-		pin_b = GPIO_PIN_3;
+		pin_a = GPIO_PIN_8;
+		pin_b = GPIO_PIN_9;
 		break;
 	case TIM_CHANNEL_2:
-		pin_a = GPIO_PIN_4;
-		pin_b = GPIO_PIN_5;
+		pin_a = GPIO_PIN_10;
+		pin_b = GPIO_PIN_11;
 		break;
 	case TIM_CHANNEL_3:
 		pin_a = GPIO_PIN_12;

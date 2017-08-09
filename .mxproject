@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=/home/xita/workspace/ED_Wind_407/Inc
+HeaderPath=/home/xita/workspace/ED_Ball/Inc
 HeaderFiles=FreeRTOSConfig.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;
-SourcePath=/home/xita/workspace/ED_Wind_407/Src
+SourcePath=/home/xita/workspace/ED_Ball/Src
 SourceFiles=FreeRTOSConfig.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;freertos.c;stm32f4xx_it.c;stm32f4xx_hal_msp.c;stm32f4xx_hal_timebase_TIM.c;main.c;
 
 [PreviousLibFiles]
