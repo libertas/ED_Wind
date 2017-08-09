@@ -88,6 +88,8 @@ bool simcom_init(UART_HandleTypeDef *device)
 {
 	sl_config(0, callback0);
 
+	sl_config(5, callback5_motion);
+
 #ifdef MPU6050_USE_MAG
 	sl_config(8, callback8_calib);
 #endif
