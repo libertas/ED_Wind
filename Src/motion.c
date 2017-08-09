@@ -15,6 +15,15 @@ TIM_HandleTypeDef *motion_htim;
 
 mypid_t px, py;
 
+uint16_t pos_x = 320;
+uint16_t pos_y = 240;
+
+uint16_t dest_x = 320;
+uint16_t dest_y = 240;
+
+uint16_t holes[9][2] = {0};
+bool holes_available = false;
+
 void motion_init(TIM_HandleTypeDef *htim)
 {
 	motion_htim = htim;
@@ -36,15 +45,15 @@ void motion_init(TIM_HandleTypeDef *htim)
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_4);
 }
 
-void motion_control(float dest_x, float dest_y, struct kine_state *ks)
+void motion_control()
 {
 	float vx, vy;
 
-	px.actual_value = ks->x;
+	px.actual_value = pos_x;
 	px.set_value = dest_x;
 	vx = pid_realize(&px);
 
-	py.actual_value = ks->y;
+	py.actual_value = pos_y;
 	px.set_value = dest_y;
 	vy = pid_realize(&py);
 
@@ -52,6 +61,23 @@ void motion_control(float dest_x, float dest_y, struct kine_state *ks)
 	l298n_set(TIM_CHANNEL_2, vy);
 	l298n_set(TIM_CHANNEL_3, -vx);
 	l298n_set(TIM_CHANNEL_4, -vy);
+}
+
+void move_to_pos(uint16_t x, uint16_t y)
+{
+	dest_x = x;
+	dest_y = y;
+}
+
+bool move_to_hole(uint8_t hole)
+{
+	if(!holes_available) {
+		return false;
+	}
+
+	move_to_pos(holes[hole][0], holes[hole][1]);
+
+	return true;
 }
 
 void l298n_set(uint32_t channel, float duty)

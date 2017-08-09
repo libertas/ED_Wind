@@ -20,6 +20,26 @@ void callback0(char from, char to, const char* data, SIMCOM_LENGTH_TYPE length)
   sl_send(to,from,data,length);
 }
 
+void callback5_motion(char from, char to, const char* data, SIMCOM_LENGTH_TYPE length)
+{
+	extern uint16_t pos_x, pos_y;
+	extern uint16_t holes[];
+	extern bool holes_available;
+
+	if(length == 4) {
+		pos_x = ((const uint16_t*)data)[0];
+		pos_y = ((const uint16_t*)data)[1];
+	}
+
+	if(length == 36) {
+		for(int i = 0; i < 18; i++) {
+			holes[i] = ((const uint16_t*)data)[i];
+		}
+		holes_available = true;
+		sl_send(to, from, 'A', 1);
+	}
+}
+
 void callback9_flash(char from, char to, const char* data, SIMCOM_LENGTH_TYPE length)
 {
 	flash_write(0, data, length);

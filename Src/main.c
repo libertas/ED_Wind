@@ -612,6 +612,7 @@ void StartControlTask(void const * argument)
 		counter = 0;
 
 		/* Control the motors */
+		motion_control();
 	}
 	osDelay(1);
   }
