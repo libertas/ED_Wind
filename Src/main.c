@@ -170,8 +170,6 @@ int main(void)
 
   flash_init();
 
-  motion_init(&htim2);
-
   /* USER CODE END 2 */
 
   /* Create the mutex(es) */
@@ -601,6 +599,8 @@ void StartControlTask(void const * argument)
 
   osDelay(200);
 
+  motion_init(&htim2);
+
   uint32_t counter = 0;
 
   /* Infinite loop */
@@ -612,6 +612,7 @@ void StartControlTask(void const * argument)
 		counter = 0;
 
 		/* Control the motors */
+		motor_control();
 		motion_control();
 	}
 	osDelay(1);

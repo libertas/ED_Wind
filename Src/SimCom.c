@@ -4,6 +4,7 @@
 #include "PhysicalLayer.h"
 #include "ServiceLayer.h"
 #include "SimCom.h"
+#include "flash.h"
 #include "mpu6050.h"
 
 #include "cmsis_os.h"

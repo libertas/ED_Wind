@@ -14,6 +14,9 @@
 
 void motion_init(TIM_HandleTypeDef *htim);
 
+void motor_control();
+void motor_reset();
+
 void motion_control();
 
 void l298n_set(uint32_t channel, float duty);

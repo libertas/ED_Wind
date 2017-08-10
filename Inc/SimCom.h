@@ -12,6 +12,7 @@
 #define SIMCOM_LENGTH_TYPE uint16_t
 #define SIMCOM_DLENGTH_TYPE uint32_t
 
+bool simcom_init(UART_HandleTypeDef *device);
 bool sl_init(UART_HandleTypeDef *device);
 
 #endif
