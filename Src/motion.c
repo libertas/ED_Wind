@@ -163,12 +163,12 @@ void motion_control()
 	x = pid_realize(&px);
 
 	py.actual_value = pos_y;
-	px.set_value = dest_y;
+	py.set_value = dest_y;
 	y = pid_realize(&py);
 
 	float mps[4];
-	mps[0] = y;
-	mps[1] = -y;
+	mps[0] = -y;
+	mps[1] = y;
 	mps[2] = -x;
 	mps[3] = x;
 

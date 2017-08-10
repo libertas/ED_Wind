@@ -86,7 +86,7 @@ osThreadId sendTaskHandle;
 uint32_t sendTaskBuffer[ 256 ];
 osStaticThreadDef_t sendTaskControlBlock;
 osThreadId receiveTaskHandle;
-uint32_t receiveTaskBuffer[ 256 ];
+uint32_t receiveTaskBuffer[ 512 ];
 osStaticThreadDef_t receiveTaskControlBlock;
 osThreadId controlTaskHandle;
 uint32_t controlTaskBuffer[ 512 ];
@@ -211,7 +211,7 @@ int main(void)
   sendTaskHandle = osThreadCreate(osThread(sendTask), NULL);
 
   /* definition and creation of receiveTask */
-  osThreadStaticDef(receiveTask, StartReceiveTask, osPriorityNormal, 0, 256, receiveTaskBuffer, &receiveTaskControlBlock);
+  osThreadStaticDef(receiveTask, StartReceiveTask, osPriorityNormal, 0, 512, receiveTaskBuffer, &receiveTaskControlBlock);
   receiveTaskHandle = osThreadCreate(osThread(receiveTask), NULL);
 
   /* definition and creation of controlTask */
