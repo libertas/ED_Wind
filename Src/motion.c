@@ -41,18 +41,18 @@ void motion_init(TIM_HandleTypeDef *htim)
 	pid_config(&px);
 	pid_config(&py);
 
-	px.kp = 2.0;
-	px.ki = 0;
-	px.kd = 1.0;
+	px.kp = 1.0;
+	px.ki = 0.0;
+	px.kd = 0.0;
 
-	py.kp = 0.0;
+	py.kp = 1.0;
 	py.ki = 0.0;
 	py.kd = 0.0;
 
 	for(int i = 0; i < 4; i++) {
 		pid_config(&(motor_pids[i]));
 
-		motor_pids[i].kp = 0.2;
+		motor_pids[i].kp = 0.5;
 		motor_pids[i].ki = 0.0;
 		motor_pids[i].kd = 0.0;
 	}
@@ -82,6 +82,9 @@ void motor_control()
 		motor_pids[i].actual_value = motor_heights[i];
 		motor_pids[i].set_value = motor_dest_heights[i];
 		v[i] = pid_realize(&(motor_pids[i]));
+
+		// !!
+		v[i] = fabsf(v[i]) / v[i];
 	}
 
 	lasttime = thistime;
@@ -111,14 +114,14 @@ void motor_reset()
 	l298n_set(TIM_CHANNEL_3, 1);
 	l298n_set(TIM_CHANNEL_4, 1);
 
-	osDelay(4000);
+	osDelay(3000);
 
 	l298n_set(TIM_CHANNEL_1, -1);
 	l298n_set(TIM_CHANNEL_2, -1);
 	l298n_set(TIM_CHANNEL_3, -1);
 	l298n_set(TIM_CHANNEL_4, -1);
 
-	osDelay(1875);
+	osDelay(845);
 
 	l298n_set(TIM_CHANNEL_1, 0);
 	l298n_set(TIM_CHANNEL_2, 0);
@@ -153,10 +156,10 @@ void motion_control()
 	y = pid_realize(&py);
 
 	float mps[4];
-	mps[0] = x;
-	mps[1] = -x;
-	mps[2] = y;
-	mps[3] = -y;
+	mps[0] = y;
+	mps[1] = -y;
+	mps[2] = -x;
+	mps[3] = x;
 
 	motor_move(mps);
 }
