@@ -31,6 +31,11 @@ void callback5_motion(char from, char to, const char* data, SIMCOM_LENGTH_TYPE l
 	if(length == 4) {
 		pos_x = ((const uint16_t*)data)[0];
 		pos_y = ((const uint16_t*)data)[1];
+
+		if(debugFlag) {
+			//sl_send(5, 0, &pos_x, 2);
+			//sl_send(5, 0, &pos_y, 2);
+		}
 	}
 
 	if(length == 36) {
@@ -44,12 +49,29 @@ void callback5_motion(char from, char to, const char* data, SIMCOM_LENGTH_TYPE l
 	if(length == 1) {
 		switch(data[0]) {
 		case 'S':
+			sl_send(to, from, "Startting", 10);
+			osDelay(1);
 			motor_start();
+			break;
+		case 's':
+			sl_send(to, from, "Stopping", 10);
+			osDelay(1);
+			motor_stop();
 			break;
 		case 'R':
 			sl_send(to, from, "Resetting", 10);
 			osDelay(1);
 			motor_reset();
+			break;
+		case 'D':
+			sl_send(to, from, "Debugging", 10);
+			osDelay(1);
+			debugFlag = true;
+			break;
+		case 'd':
+			sl_send(to, from, "Not Debugging", 14);
+			osDelay(1);
+			debugFlag = false;
 			break;
 		default:
 			break;

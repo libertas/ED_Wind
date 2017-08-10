@@ -8,11 +8,15 @@
 #ifndef MOTION_H_
 #define MOTION_H_
 
+#include <stdbool.h>
+
 #include "stm32f4xx_hal.h"
 
 #include "mpu6050.h"
 
 #define MOTOR_LIMIT 0.8f
+
+bool debugFlag;
 
 
 void motion_init(TIM_HandleTypeDef *htim);

@@ -6,6 +6,7 @@
  */
 
 #include <math.h>
+#include <string.h>
 
 #include "cmsis_os.h"
 
@@ -13,6 +14,8 @@
 #include "pid.h"
 #include "pwm.h"
 #include "time.h"
+
+bool debugFlag = false;
 
 TIM_HandleTypeDef *motion_htim;
 
@@ -85,6 +88,10 @@ void motor_control()
 
 		// !!
 		v[i] = fabsf(v[i]) / v[i];
+
+		if(debugFlag) {
+			sl_send(5, 0, &(v[i]), 4);
+		}
 	}
 
 	lasttime = thistime;
