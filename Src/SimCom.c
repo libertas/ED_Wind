@@ -43,6 +43,9 @@ void callback5_motion(char from, char to, const char* data, SIMCOM_LENGTH_TYPE l
 
 	if(length == 1) {
 		switch(data[0]) {
+		case 'S':
+			motor_start();
+			break;
 		case 'R':
 			sl_send(to, from, "Resetting", 10);
 			osDelay(1);

@@ -18,6 +18,8 @@
 void motion_init(TIM_HandleTypeDef *htim);
 
 void motor_control();
+void motor_start();
+void motor_stop();
 void motor_reset();
 
 void motion_control();

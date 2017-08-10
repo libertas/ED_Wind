@@ -32,7 +32,7 @@ mypid_t motor_pids[4];
 float motor_dest_heights[4] = {0};
 float motor_heights[4] = {0};
 float motor_v[4] = {0};
-bool motor_resetting = false;
+bool motor_resetting = true;
 
 void motion_init(TIM_HandleTypeDef *htim)
 {
@@ -92,6 +92,16 @@ void motor_control()
 	l298n_set(TIM_CHANNEL_4, -v[3]);
 }
 
+void motor_start()
+{
+	motor_resetting = false;
+}
+
+void motor_stop()
+{
+	motor_resetting = true;
+}
+
 void motor_reset()
 {
 	motor_resetting = true;
@@ -118,8 +128,6 @@ void motor_reset()
 	for(int i = 0; i < 4; i++) {
 		motor_heights[i] = 0;
 	}
-
-	motor_resetting = false;
 }
 
 void motor_move(float heights[4])
