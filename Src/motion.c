@@ -87,7 +87,11 @@ void motor_control()
 		v[i] = pid_realize(&(motor_pids[i]));
 
 		// !!
-		v[i] = fabsf(v[i]) / v[i];
+		if(fabsf(v[i]) > 0.001f) {
+			v[i] = fabsf(v[i]) / v[i];
+		} else {
+			v[i] = 0;
+		}
 
 		if(debugFlag) {
 			sl_send(5, 0, &(v[i]), 4);
