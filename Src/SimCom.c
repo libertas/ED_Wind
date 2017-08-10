@@ -5,6 +5,7 @@
 #include "ServiceLayer.h"
 #include "SimCom.h"
 #include "flash.h"
+#include "motion.h"
 #include "mpu6050.h"
 
 #include "cmsis_os.h"
@@ -38,6 +39,18 @@ void callback5_motion(char from, char to, const char* data, SIMCOM_LENGTH_TYPE l
 		}
 		holes_available = true;
 		sl_send(to, from, 'A', 1);
+	}
+
+	if(length == 1) {
+		switch(data[0]) {
+		case 'R':
+			sl_send(to, from, "Resetting", 10);
+			osDelay(1);
+			motor_reset();
+			break;
+		default:
+			break;
+		}
 	}
 }
 

@@ -12,6 +12,9 @@
 
 #include "mpu6050.h"
 
+#define MOTOR_LIMIT 3.0f
+
+
 void motion_init(TIM_HandleTypeDef *htim);
 
 void motor_control();

@@ -52,7 +52,7 @@ void motion_init(TIM_HandleTypeDef *htim)
 	for(int i = 0; i < 4; i++) {
 		pid_config(&(motor_pids[i]));
 
-		motor_pids[i].kp = 1.0;
+		motor_pids[i].kp = 0.2;
 		motor_pids[i].ki = 0.0;
 		motor_pids[i].kd = 0.0;
 	}
@@ -125,6 +125,9 @@ void motor_reset()
 void motor_move(float heights[4])
 {
 	for(int i = 0; i < 4; i++) {
+		if(fabsf(heights[i]) > MOTOR_LIMIT) {
+			heights[i] = heights[i] / fabsf(heights[i]) * MOTOR_LIMIT;
+		}
 		motor_dest_heights[i] = heights[i];
 	}
 }
@@ -141,8 +144,13 @@ void motion_control()
 	px.set_value = dest_y;
 	y = pid_realize(&py);
 
-	dest_x = x;
-	dest_y = y;
+	float mps[4];
+	mps[0] = x;
+	mps[1] = -x;
+	mps[2] = y;
+	mps[3] = -y;
+
+	motor_move(mps);
 }
 
 void move_to_pos(uint16_t x, uint16_t y)
