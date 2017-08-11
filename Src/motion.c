@@ -42,22 +42,49 @@ void motion_init(TIM_HandleTypeDef *htim)
 	pid_config(&px);
 	pid_config(&py);
 
-	px.kp = 1.0;
-	px.ki = 0.0;
+	px.kp = 0.001;
+	px.ki = 0.001;
 	px.kd = 0.0;
 
 	py.kp = 1.0;
 	py.ki = 0.0;
 	py.kd = 0.0;
 
-	for(int i = 0; i < 4; i++) {
-		motor_dest_angles[i] = 0.0f;
+	{
+		motor_dest_angles[0] = 0.0f;
 
-		pid_config(&(motor_pids[i]));
+		pid_config(&(motor_pids[0]));
 
-		motor_pids[i].kp = 1.0;
-		motor_pids[i].ki = 0.0;
-		motor_pids[i].kd = 0.0;
+		motor_pids[0].kp = 1000.0;
+		motor_pids[0].ki = 0.0;
+		motor_pids[0].kd = 100.0;
+
+
+		motor_dest_angles[1] = 0.0f;
+
+		pid_config(&(motor_pids[1]));
+
+		motor_pids[1].kp = 1000.0;
+		motor_pids[1].ki = 0.0;
+		motor_pids[1].kd = 100.0;
+
+
+		motor_dest_angles[2] = 0.0f;
+
+		pid_config(&(motor_pids[2]));
+
+		motor_pids[2].kp = 1000.0;
+		motor_pids[2].ki = 0.0;
+		motor_pids[2].kd = 100.0;
+
+
+		motor_dest_angles[3] = 0.0f;
+
+		pid_config(&(motor_pids[3]));
+
+		motor_pids[3].kp = 1000.0;
+		motor_pids[3].ki = 0.0;
+		motor_pids[3].kd = 100.0;
 	}
 
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_1);
@@ -75,10 +102,10 @@ void motor_control(struct kine_state *ks)
 	}
 
 	float x[4];
-	x[0] = (ks->x);
-	x[1] = -(ks->x);
-	x[2] = -(ks->y);
-	x[3] = (ks->y);
+	x[0] = (ks->x1);
+	x[1] = -(ks->x1);
+	x[2] = -(ks->y1);
+	x[3] = (ks->y1);
 
 
 	float v[4];
@@ -90,7 +117,7 @@ void motor_control(struct kine_state *ks)
 
 		// !!
 		if(fabsf(v[i]) > 0.001f) {
-			v[i] = fabsf(v[i]) / v[i];
+//			v[i] = fabsf(v[i]) / v[i];
 		} else {
 			v[i] = 0;
 		}
@@ -114,6 +141,11 @@ void motor_start()
 void motor_stop()
 {
 	motor_resetting = true;
+
+	l298n_set(TIM_CHANNEL_1, 0);
+	l298n_set(TIM_CHANNEL_2, 0);
+	l298n_set(TIM_CHANNEL_3, 0);
+	l298n_set(TIM_CHANNEL_4, 0);
 }
 
 void motor_reset()
@@ -163,10 +195,10 @@ void motion_control()
 	y = pid_realize(&py);
 
 	float mps[4];
-	mps[0] = x;
-	mps[1] = -x;
-	mps[2] = -y;
-	mps[3] = y;
+	mps[0] = -y;
+	mps[1] = y;
+	mps[2] = -x;
+	mps[3] = x;
 
 	motor_move(mps);
 }
