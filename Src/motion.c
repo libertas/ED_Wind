@@ -31,10 +31,8 @@ uint16_t holes[9][2] = {0};
 bool holes_available = false;
 
 mypid_t motor_pids[4];
+float motor_dest_angles[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
-float motor_dest_heights[4] = {0};
-float motor_heights[4] = {0};
-float motor_v[4] = {0};
 bool motor_resetting = true;
 
 void motion_init(TIM_HandleTypeDef *htim)
@@ -55,7 +53,7 @@ void motion_init(TIM_HandleTypeDef *htim)
 	for(int i = 0; i < 4; i++) {
 		pid_config(&(motor_pids[i]));
 
-		motor_pids[i].kp = 0.5;
+		motor_pids[i].kp = 1.0;
 		motor_pids[i].ki = 0.0;
 		motor_pids[i].kd = 0.0;
 	}
@@ -68,22 +66,24 @@ void motion_init(TIM_HandleTypeDef *htim)
 	motor_reset();
 }
 
-void motor_control()
+void motor_control(struct kine_state *ks)
 {
 	if(motor_resetting) {
 		return;
 	}
 
-	static float lasttime = 0;
-	float thistime = seconds();
+	float x[4];
+	x[0] = (ks->y);
+	x[1] = (ks->y);
+	x[2] = (ks->x);
+	x[3] = (ks->x);
 
-	float *v = motor_v;
+
+	float v[4];
 
 	for(int i = 0; i < 4; i++) {
-		motor_heights[i] += v[i] * (thistime - lasttime);
-
-		motor_pids[i].actual_value = motor_heights[i];
-		motor_pids[i].set_value = motor_dest_heights[i];
+		motor_pids[i].actual_value = x[i];
+		motor_pids[i].set_value = motor_dest_angles[i];
 		v[i] = pid_realize(&(motor_pids[i]));
 
 		// !!
@@ -98,12 +98,10 @@ void motor_control()
 		}
 	}
 
-	lasttime = thistime;
-
-	l298n_set(TIM_CHANNEL_1, -v[0]);
-	l298n_set(TIM_CHANNEL_2, -v[1]);
-	l298n_set(TIM_CHANNEL_3, -v[2]);
-	l298n_set(TIM_CHANNEL_4, -v[3]);
+	l298n_set(TIM_CHANNEL_1, v[0]);
+	l298n_set(TIM_CHANNEL_2, v[1]);
+	l298n_set(TIM_CHANNEL_3, v[2]);
+	l298n_set(TIM_CHANNEL_4, v[3]);
 }
 
 void motor_start()
@@ -138,19 +136,15 @@ void motor_reset()
 	l298n_set(TIM_CHANNEL_2, 0);
 	l298n_set(TIM_CHANNEL_3, 0);
 	l298n_set(TIM_CHANNEL_4, 0);
-
-	for(int i = 0; i < 4; i++) {
-		motor_heights[i] = 0;
-	}
 }
 
-void motor_move(float heights[4])
+void motor_move(float angles[4])
 {
 	for(int i = 0; i < 4; i++) {
-		if(fabsf(heights[i]) > MOTOR_LIMIT) {
-			heights[i] = heights[i] / fabsf(heights[i]) * MOTOR_LIMIT;
+		if(fabsf(angles[i]) > MOTOR_ANGLE_LIMIT) {
+			angles[i] = angles[i] / fabsf(angles[i]) * MOTOR_ANGLE_LIMIT;
 		}
-		motor_dest_heights[i] = heights[i];
+		motor_dest_angles[i] = angles[i];
 	}
 }
 

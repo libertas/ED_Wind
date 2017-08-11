@@ -251,12 +251,12 @@ void mpu6050_get_kine_state(struct kine_state *result)
 	float wx, wy, wz;
 
 	ax = mpu6050_get_exact_data(ACCEL_XOUT_H);
-	ay = mpu6050_get_exact_data(ACCEL_YOUT_H);
-	az = mpu6050_get_exact_data(ACCEL_ZOUT_H);
+	ay = -mpu6050_get_exact_data(ACCEL_YOUT_H);
+	az = -mpu6050_get_exact_data(ACCEL_ZOUT_H);
 
-	wx = mpu6050_get_exact_data(GYRO_XOUT_H);
+	wx = -mpu6050_get_exact_data(GYRO_XOUT_H);
 	wy = mpu6050_get_exact_data(GYRO_YOUT_H);
-	wz = mpu6050_get_exact_data(GYRO_ZOUT_H);
+	wz = -mpu6050_get_exact_data(GYRO_ZOUT_H);
 
 #ifdef MPU6050_USE_MAG
 

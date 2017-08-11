@@ -14,14 +14,14 @@
 
 #include "mpu6050.h"
 
-#define MOTOR_LIMIT 0.3f
+#define MOTOR_ANGLE_LIMIT 0.2f
 
 bool debugFlag;
 
 
 void motion_init(TIM_HandleTypeDef *htim);
 
-void motor_control();
+void motor_control(struct kine_state *ks);
 void motor_start();
 void motor_stop();
 void motor_reset();

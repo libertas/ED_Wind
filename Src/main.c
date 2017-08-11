@@ -584,6 +584,21 @@ void StartDefaultTask(void const * argument)
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 1);
 	  osDelay(100);
 
+
+	  osMutexWait(ks_lockHandle, osWaitForever);
+
+	  msg = (char*)(&(ks.x));
+	  sl_send(0, 0, msg, 12);
+//	  msg = (char*)(&(ks.wx));
+//	  sl_send(0, 0, msg, 12);
+//	  msg = (char*)(&(ks.ax));
+//	  sl_send(0, 0, msg, 12);
+//	  msg = (char*)(&(ks.x1));
+//	  sl_send(0, 0, msg, 12);
+
+	  osMutexRelease(ks_lockHandle);
+
+
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 0);
@@ -597,22 +612,49 @@ void StartControlTask(void const * argument)
 {
   /* USER CODE BEGIN StartControlTask */
 
-  osDelay(200);
 
   motion_init(&htim2);
 
+  osDelay(200);
+
+  mpu6050_init(&hi2c1);
+
   uint32_t counter = 0;
+
+#ifdef MPU6050_USE_DMA
+  bool *kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+#endif
 
   /* Infinite loop */
   for(;;)
   {
 	counter++;
 
+
+#ifdef MPU6050_USE_DMA
+	while(!(*kine_flag)) {
+		osDelay(1);
+		if(!(*kine_flag)) {
+			kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+		}
+	}
+
+	mpu6050_update_data();
+	kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
+#endif
+
+	osMutexWait(ks_lockHandle, osWaitForever);
+
+	mpu6050_get_kine_state(&ks);
+
+	osMutexRelease(ks_lockHandle);
+
+
 	if(counter >= 5) {
 		counter = 0;
 
 		/* Control the motors */
-		motor_control();
+		motor_control(&ks);
 		motion_control();
 	}
 	osDelay(1);
