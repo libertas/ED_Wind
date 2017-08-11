@@ -44,13 +44,13 @@ void motion_init(TIM_HandleTypeDef *htim)
 	pid_config(&px);
 	pid_config(&py);
 
-	px.kp = 5.0;
+	px.kp = 4.0;
 	px.ki = 0.0;
-	px.kd = 2.0;
+	px.kd = 50.0;
 
-	py.kp = 5.0;
+	py.kp = 4.0;
 	py.ki = 0.0;
-	py.kd = 2.0;
+	py.kd = 50.0;
 
 	for(int i = 0; i < 4; i++) {
 		pid_config(&(motor_pids[i]));
