@@ -55,20 +55,20 @@ void motion_init(TIM_HandleTypeDef *htim)
 	pid_config(&px);
 	pid_config(&py);
 
-	px.kp = 8.0;
+	px.kp = 4.0;
 	px.ki = 0.0;
 	px.kd = 50.0;
 
-	py.kp = 8.0;
+	py.kp = 4.0;
 	py.ki = 0.0;
 	py.kd = 50.0;
 
 	for(int i = 0; i < 4; i++) {
 		pid_config(&(motor_pids[i]));
 
-		motor_pids[i].kp = 0.02;
+		motor_pids[i].kp = 0.05;
 		motor_pids[i].ki = 0.0;
-		motor_pids[i].kd = 0.02;
+		motor_pids[i].kd = 0.05;
 	}
 
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_1);
@@ -104,8 +104,8 @@ void motor_control()
 		v[i] = pid_realize(&(motor_pids[i]));
 
 		// !!
-		if(fabsf(motor_pids[i].error) > 35.0f) {
-//			v[i] = fabsf(v[i]) / v[i];
+		if(fabsf(motor_pids[i].error) > 15.0f) {
+			v[i] = fabsf(v[i]) / v[i];
 		} else {
 			v[i] = 0;
 		}
@@ -198,6 +198,14 @@ void motion_control()
 		py.actual_value = pos_y;
 		py.set_value = dest_y;
 		y = pid_realize(&py);
+
+		if(px.error < 25) {
+			x *= 1.5;
+		}
+
+		if(py.error < 25) {
+			y *= 1.5;
+		}
 	}
 
 
