@@ -55,11 +55,11 @@ void motion_init(TIM_HandleTypeDef *htim)
 	pid_config(&px);
 	pid_config(&py);
 
-	px.kp = 4.0;
+	px.kp = 8.0;
 	px.ki = 0.0;
 	px.kd = 50.0;
 
-	py.kp = 4.0;
+	py.kp = 8.0;
 	py.ki = 0.0;
 	py.kd = 50.0;
 
@@ -77,6 +77,7 @@ void motion_init(TIM_HandleTypeDef *htim)
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_4);
 
 	motor_reset();
+	motion_reset();
 }
 
 void motor_control()

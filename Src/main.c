@@ -718,6 +718,8 @@ void StartTasksTask(void const * argument)
 
   char task;
 
+  extern uint16_t holes[9][2];
+
   /* Infinite loop */
   for(;;)
   {
@@ -730,14 +732,31 @@ void StartTasksTask(void const * argument)
 	  switch(task) {
 	  case '1':
 		  sl_send(2, 2, "Starting task 1", 16);
-		  motion_reset();
-		  osDelay(2000);
 		  move_to_pos(get_pos_x(), get_pos_y());
 		  motor_start();
 		  osDelay(6000);
 		  motion_reset();
 		  move_to_pos(320, 240);
 		  sl_send(2, 2, "Stopping task 1", 16);
+		  break;
+	  case '2':
+		  sl_send(2, 2, "Starting task 2", 16);
+		  move_to_pos(get_pos_x() + holes[4][0] - holes[0][0],\
+				  get_pos_y() + holes[4][1] - holes[0][1]);
+		  motor_start();
+		  osDelay(15000);
+		  motion_reset();
+		  move_to_pos(320, 240);
+		  sl_send(2, 2, "Stopping task 2", 16);
+		  break;
+	  case '3':
+		  sl_send(2, 2, "Starting task 3", 16);
+		  move_to_pos(500, 350);
+		  motor_start();
+		  osDelay(20000);
+		  motion_reset();
+		  move_to_pos(320, 240);
+		  sl_send(2, 2, "Stopping task 3", 16);
 		  break;
 	  default:
 		  break;
