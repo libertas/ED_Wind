@@ -28,6 +28,11 @@ void callback5_motion(char from, char to, const char* data, SIMCOM_LENGTH_TYPE l
 	extern uint16_t holes[];
 	extern bool holes_available;
 
+	extern osMutexId task_lockHandle;
+	extern char currentTask;
+
+	char c;
+
 	if(length == 4) {
 		pos_x = ((const uint16_t*)data)[0];
 		pos_y = ((const uint16_t*)data)[1];
@@ -72,6 +77,29 @@ void callback5_motion(char from, char to, const char* data, SIMCOM_LENGTH_TYPE l
 			sl_send(to, from, "Not Debugging", 14);
 			osDelay(1);
 			debugFlag = false;
+			break;
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+		case '0':
+			osMutexWait(task_lockHandle, osWaitForever);
+
+			if(currentTask != '0') {
+				c = ~(data[0]);
+			} else {
+				currentTask = data[0];
+				c = data[0];
+			}
+
+			osMutexRelease(task_lockHandle);
+
+			sl_send(to, from, &c, 1); // Ack or NAck
 			break;
 		default:
 			break;

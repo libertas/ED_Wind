@@ -105,11 +105,14 @@ osMutexId ph_send_lockHandle;
 osStaticMutexDef_t ph_send_lockControlBlock;
 osMutexId ks_lockHandle;
 osStaticMutexDef_t ks_lockControlBlock;
+osMutexId task_lockHandle;
+osStaticMutexDef_t task_lockControlBlock;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
 struct kine_state ks = {0};
+char currentTask = '0';
 
 /* USER CODE END PV */
 
@@ -200,6 +203,10 @@ int main(void)
   /* definition and creation of ks_lock */
   osMutexStaticDef(ks_lock, &ks_lockControlBlock);
   ks_lockHandle = osMutexCreate(osMutex(ks_lock));
+
+  /* definition and creation of task_lock */
+  osMutexStaticDef(task_lock, &task_lockControlBlock);
+  task_lockHandle = osMutexCreate(osMutex(task_lock));
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -708,9 +715,31 @@ void StartControlTask(void const * argument)
 void StartTasksTask(void const * argument)
 {
   /* USER CODE BEGIN StartTasksTask */
+
+  char task;
+
   /* Infinite loop */
   for(;;)
   {
+	  osMutexWait(task_lockHandle, osWaitForever);
+
+	  task = currentTask;
+
+	  osMutexRelease(task_lockHandle);
+
+	  switch(task) {
+	  case '1':
+		  osDelay(1000);
+		  break;
+	  default:
+		  break;
+	  }
+
+	  osMutexWait(task_lockHandle, osWaitForever);
+	  currentTask = '0';
+	  osMutexRelease(task_lockHandle);
+
+
 //    while(move_to_hole(0) != true) {
 //    	osDelay(1);
 //    }
@@ -722,7 +751,7 @@ void StartTasksTask(void const * argument)
 //
 //    move_to_hole(4);
 //
-	  osDelay(5000);
+	  osDelay(1);
   }
   /* USER CODE END StartTasksTask */
 }
