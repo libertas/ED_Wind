@@ -14,7 +14,8 @@
 
 #include "mpu6050.h"
 
-#define MOTOR_LIMIT 0.3f
+#define MOTOR_LIMIT 500
+#define MOTOR_MID 1000
 
 bool debugFlag;
 
@@ -25,6 +26,7 @@ void motor_control();
 void motor_start();
 void motor_stop();
 void motor_reset();
+void motor_move_mid();
 
 void motion_control();
 

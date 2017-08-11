@@ -13,6 +13,7 @@
 #include "motion.h"
 #include "pid.h"
 #include "pwm.h"
+#include "resistor.h"
 #include "time.h"
 
 bool debugFlag = false;
@@ -34,7 +35,6 @@ mypid_t motor_pids[4];
 
 float motor_dest_heights[4] = {0};
 float motor_heights[4] = {0};
-float motor_v[4] = {0};
 bool motor_resetting = true;
 
 void motion_init(TIM_HandleTypeDef *htim)
@@ -74,13 +74,10 @@ void motor_control()
 		return;
 	}
 
-	static float lasttime = 0;
-	float thistime = seconds();
-
-	float *v = motor_v;
+	float v[4];
 
 	for(int i = 0; i < 4; i++) {
-		motor_heights[i] += v[i] * (thistime - lasttime);
+		motor_heights[i] = resistor_get(i);
 
 		motor_pids[i].actual_value = motor_heights[i];
 		motor_pids[i].set_value = motor_dest_heights[i];
@@ -93,12 +90,14 @@ void motor_control()
 			v[i] = 0;
 		}
 
+		if(motor_heights[i] > 3500 && v[i] > 0) {
+			v[i] = 0;
+		}
+
 		if(debugFlag) {
 			sl_send(5, 0, &(v[i]), 4);
 		}
 	}
-
-	lasttime = thistime;
 
 	l298n_set(TIM_CHANNEL_1, -v[0]);
 	l298n_set(TIM_CHANNEL_2, -v[1]);
@@ -127,21 +126,11 @@ void motor_reset()
 
 	osDelay(3000);
 
-	l298n_set(TIM_CHANNEL_1, -1);
-	l298n_set(TIM_CHANNEL_2, -1);
-	l298n_set(TIM_CHANNEL_3, -1);
-	l298n_set(TIM_CHANNEL_4, -1);
-
-	osDelay(845);
-
-	l298n_set(TIM_CHANNEL_1, 0);
-	l298n_set(TIM_CHANNEL_2, 0);
-	l298n_set(TIM_CHANNEL_3, 0);
-	l298n_set(TIM_CHANNEL_4, 0);
-
 	for(int i = 0; i < 4; i++) {
 		motor_heights[i] = 0;
 	}
+
+	motor_move_mid();
 }
 
 void motor_move(float heights[4])
@@ -152,6 +141,17 @@ void motor_move(float heights[4])
 		}
 		motor_dest_heights[i] = heights[i];
 	}
+}
+
+void motor_move_mid()
+{
+	float mps[4];
+
+	for(int i = 0; i < 4; i++) {
+		mps[i] = MOTOR_MID;
+	}
+
+	motor_move(mps);
 }
 
 void motion_control()
