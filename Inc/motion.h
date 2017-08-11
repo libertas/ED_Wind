@@ -19,6 +19,8 @@
 
 bool debugFlag;
 
+uint16_t get_pos_x();
+uint16_t get_pos_y();
 
 void motion_init(TIM_HandleTypeDef *htim);
 
@@ -29,6 +31,8 @@ void motor_reset();
 void motor_move_mid();
 
 void motion_control();
+
+void move_to_pos(uint16_t x, uint16_t y);
 
 void l298n_set(uint32_t channel, float duty);
 

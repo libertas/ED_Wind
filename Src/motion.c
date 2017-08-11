@@ -37,6 +37,16 @@ float motor_dest_heights[4] = {0};
 float motor_heights[4] = {0};
 bool motor_resetting = true;
 
+uint16_t get_pos_x()
+{
+	return pos_x;
+}
+
+uint16_t get_pos_y()
+{
+	return pos_y;
+}
+
 void motion_init(TIM_HandleTypeDef *htim)
 {
 	motion_htim = htim;
