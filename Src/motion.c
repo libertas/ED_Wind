@@ -55,36 +55,36 @@ void motion_init(TIM_HandleTypeDef *htim)
 
 		pid_config(&(motor_pids[0]));
 
-		motor_pids[0].kp = 1000.0;
+		motor_pids[0].kp = 100.0;
 		motor_pids[0].ki = 0.0;
-		motor_pids[0].kd = 100.0;
+		motor_pids[0].kd = 0.0;
 
 
 		motor_dest_angles[1] = 0.0f;
 
 		pid_config(&(motor_pids[1]));
 
-		motor_pids[1].kp = 1000.0;
+		motor_pids[1].kp = 100.0;
 		motor_pids[1].ki = 0.0;
-		motor_pids[1].kd = 100.0;
+		motor_pids[1].kd = 0.0;
 
 
 		motor_dest_angles[2] = 0.0f;
 
 		pid_config(&(motor_pids[2]));
 
-		motor_pids[2].kp = 1000.0;
+		motor_pids[2].kp = 100.0;
 		motor_pids[2].ki = 0.0;
-		motor_pids[2].kd = 100.0;
+		motor_pids[2].kd = 0.0;
 
 
 		motor_dest_angles[3] = 0.0f;
 
 		pid_config(&(motor_pids[3]));
 
-		motor_pids[3].kp = 1000.0;
+		motor_pids[3].kp = 100.0;
 		motor_pids[3].ki = 0.0;
-		motor_pids[3].kd = 100.0;
+		motor_pids[3].kd = 0.0;
 	}
 
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_1);
@@ -116,10 +116,14 @@ void motor_control(struct kine_state *ks)
 		v[i] = pid_realize(&(motor_pids[i]));
 
 		// !!
-		if(fabsf(v[i]) > 0.001f) {
-//			v[i] = fabsf(v[i]) / v[i];
-		} else {
+		float abs_error = fabsf(motor_pids[i].error);
+		if(abs_error < 0.03f) {
 			v[i] = 0;
+		} else if(abs_error < 0.1f) {
+			v[i] = fabsf(v[i]) / v[i] * 0.5f;
+		} else {
+
+			v[i] = fabsf(v[i]) / v[i] * 1.0f;
 		}
 
 		if(debugFlag) {
