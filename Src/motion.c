@@ -31,7 +31,7 @@ uint16_t holes[9][2] = {0};
 bool holes_available = false;
 
 mypid_t motor_pids[4];
-float motor_dest_angles[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+float motor_dest_angles[4];
 
 bool motor_resetting = true;
 
@@ -51,6 +51,8 @@ void motion_init(TIM_HandleTypeDef *htim)
 	py.kd = 0.0;
 
 	for(int i = 0; i < 4; i++) {
+		motor_dest_angles[i] = 0.0f;
+
 		pid_config(&(motor_pids[i]));
 
 		motor_pids[i].kp = 1.0;
@@ -73,10 +75,10 @@ void motor_control(struct kine_state *ks)
 	}
 
 	float x[4];
-	x[0] = (ks->y);
-	x[1] = (ks->y);
-	x[2] = (ks->x);
-	x[3] = (ks->x);
+	x[0] = (ks->x);
+	x[1] = -(ks->x);
+	x[2] = -(ks->y);
+	x[3] = (ks->y);
 
 
 	float v[4];
@@ -98,10 +100,10 @@ void motor_control(struct kine_state *ks)
 		}
 	}
 
-	l298n_set(TIM_CHANNEL_1, v[0]);
-	l298n_set(TIM_CHANNEL_2, v[1]);
-	l298n_set(TIM_CHANNEL_3, v[2]);
-	l298n_set(TIM_CHANNEL_4, v[3]);
+	l298n_set(TIM_CHANNEL_1, -v[0]);
+	l298n_set(TIM_CHANNEL_2, -v[1]);
+	l298n_set(TIM_CHANNEL_3, -v[2]);
+	l298n_set(TIM_CHANNEL_4, -v[3]);
 }
 
 void motor_start()
@@ -161,10 +163,10 @@ void motion_control()
 	y = pid_realize(&py);
 
 	float mps[4];
-	mps[0] = -y;
-	mps[1] = y;
-	mps[2] = -x;
-	mps[3] = x;
+	mps[0] = x;
+	mps[1] = -x;
+	mps[2] = -y;
+	mps[3] = y;
 
 	motor_move(mps);
 }

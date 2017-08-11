@@ -14,7 +14,7 @@
 
 #include "mpu6050.h"
 
-#define MOTOR_ANGLE_LIMIT 0.2f
+#define MOTOR_ANGLE_LIMIT 0.1f
 
 bool debugFlag;
 

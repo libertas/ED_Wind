@@ -633,7 +633,7 @@ void StartControlTask(void const * argument)
 
 #ifdef MPU6050_USE_DMA
 	while(!(*kine_flag)) {
-		osDelay(1);
+		osDelay(5);
 		if(!(*kine_flag)) {
 			kine_flag = mpu6050_start_read_dma(MPU6050SlaveAddress);
 		}
@@ -654,8 +654,8 @@ void StartControlTask(void const * argument)
 		counter = 0;
 
 		/* Control the motors */
-		motor_control(&ks);
 		motion_control();
+		motor_control(&ks);
 	}
 	osDelay(1);
   }

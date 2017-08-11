@@ -7,7 +7,7 @@
 
 #include "stm32f4xx_hal.h"
 
-#define MPU6050_USE_DMA
+//#define MPU6050_USE_DMA
 //#define MPU6050_USE_MAG
 
 #define MPU_SUM 300
