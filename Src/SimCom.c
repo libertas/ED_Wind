@@ -78,6 +78,11 @@ void callback5_motion(char from, char to, const char* data, SIMCOM_LENGTH_TYPE l
 			osDelay(1);
 			debugFlag = false;
 			break;
+		case 'M':
+			motion_reset();
+			sl_send(to, from, "Motion Resseting", 17);
+			osDelay(1);
+			break;
 		case '1':
 		case '2':
 		case '3':

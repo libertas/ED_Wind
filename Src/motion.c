@@ -36,6 +36,7 @@ mypid_t motor_pids[4];
 float motor_dest_heights[4] = {0};
 float motor_heights[4] = {0};
 bool motor_resetting = true;
+bool motion_resetting = true;
 
 uint16_t get_pos_x()
 {
@@ -126,6 +127,7 @@ void motor_control()
 void motor_start()
 {
 	motor_resetting = false;
+	motion_resetting = false;
 }
 
 void motor_stop()
@@ -171,17 +173,32 @@ void motor_move_mid()
 	motor_move(mps);
 }
 
+void motion_reset()
+{
+	motor_start();
+
+	motion_resetting = true;
+	pos_x = 0;
+	pos_y = 0;
+}
+
 void motion_control()
 {
 	float x, y;
 
-	px.actual_value = pos_x;
-	px.set_value = dest_x;
-	x = pid_realize(&px);
+	if(motion_resetting) {
+		x = 0;
+		y = 0;
+	} else {
+		px.actual_value = pos_x;
+		px.set_value = dest_x;
+		x = pid_realize(&px);
 
-	py.actual_value = pos_y;
-	py.set_value = dest_y;
-	y = pid_realize(&py);
+		py.actual_value = pos_y;
+		py.set_value = dest_y;
+		y = pid_realize(&py);
+	}
+
 
 	float mps[4];
 	mps[0] = -y + MOTOR_MID;
