@@ -43,7 +43,7 @@ void callback5_motion(char from, char to, const char* data, SIMCOM_LENGTH_TYPE l
 			holes[i] = ((const uint16_t*)data)[i];
 		}
 		holes_available = true;
-		sl_send(to, from, 'A', 1);
+		sl_send(to, from, "A", 1);
 	}
 
 	if(length == 1) {

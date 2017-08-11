@@ -94,6 +94,9 @@ osStaticThreadDef_t receiveTaskControlBlock;
 osThreadId controlTaskHandle;
 uint32_t controlTaskBuffer[ 512 ];
 osStaticThreadDef_t controlTaskControlBlock;
+osThreadId tasksTaskHandle;
+uint32_t tasksTaskBuffer[ 256 ];
+osStaticThreadDef_t tasksTaskControlBlock;
 osMutexId sl_send_lockHandle;
 osStaticMutexDef_t sl_send_lockControlBlock;
 osMutexId dl_send_lockHandle;
@@ -123,6 +126,7 @@ void StartDefaultTask(void const * argument);
 extern void StartSendTask(void const * argument);
 extern void StartReceiveTask(void const * argument);
 void StartControlTask(void const * argument);
+void StartTasksTask(void const * argument);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
                                 
@@ -225,6 +229,10 @@ int main(void)
   /* definition and creation of controlTask */
   osThreadStaticDef(controlTask, StartControlTask, osPriorityRealtime, 0, 512, controlTaskBuffer, &controlTaskControlBlock);
   controlTaskHandle = osThreadCreate(osThread(controlTask), NULL);
+
+  /* definition and creation of tasksTask */
+  osThreadStaticDef(tasksTask, StartTasksTask, osPriorityHigh, 0, 256, tasksTaskBuffer, &tasksTaskControlBlock);
+  tasksTaskHandle = osThreadCreate(osThread(tasksTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -659,9 +667,6 @@ void StartDefaultTask(void const * argument)
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 1);
 	  osDelay(100);
 
-	  uint16_t data = resistor_get(3);
-	  sl_send(0, 0, (uint8_t*)(&data), 2);
-
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 0);
@@ -697,6 +702,29 @@ void StartControlTask(void const * argument)
   }
 
   /* USER CODE END StartControlTask */
+}
+
+/* StartTasksTask function */
+void StartTasksTask(void const * argument)
+{
+  /* USER CODE BEGIN StartTasksTask */
+  /* Infinite loop */
+  for(;;)
+  {
+//    while(move_to_hole(0) != true) {
+//    	osDelay(1);
+//    }
+//    osDelay(2000);
+//
+//    move_to_hole(3);
+//
+//    osDelay(5000);
+//
+//    move_to_hole(4);
+//
+//	osDelay(5000);
+  }
+  /* USER CODE END StartTasksTask */
 }
 
 /**

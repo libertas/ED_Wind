@@ -46,11 +46,11 @@ void motion_init(TIM_HandleTypeDef *htim)
 
 	px.kp = 5.0;
 	px.ki = 0.0;
-	px.kd = 1.0;
+	px.kd = 2.0;
 
 	py.kp = 5.0;
 	py.ki = 0.0;
-	py.kd = 1.0;
+	py.kd = 2.0;
 
 	for(int i = 0; i < 4; i++) {
 		pid_config(&(motor_pids[i]));
@@ -92,7 +92,7 @@ void motor_control()
 		v[i] = pid_realize(&(motor_pids[i]));
 
 		// !!
-		if(fabsf(motor_pids[i].error) > 45.0f) {
+		if(fabsf(motor_pids[i].error) > 35.0f) {
 //			v[i] = fabsf(v[i]) / v[i];
 		} else {
 			v[i] = 0;

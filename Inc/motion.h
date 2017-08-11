@@ -15,7 +15,7 @@
 #include "mpu6050.h"
 
 #define MOTOR_LIMIT 800
-#define MOTOR_MID 1250
+#define MOTOR_MID 1750
 
 bool debugFlag;
 
