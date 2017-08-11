@@ -129,8 +129,6 @@ void motor_reset()
 	for(int i = 0; i < 4; i++) {
 		motor_heights[i] = 0;
 	}
-
-	motor_move_mid();
 }
 
 void motor_move(float heights[4])
@@ -167,10 +165,10 @@ void motion_control()
 	y = pid_realize(&py);
 
 	float mps[4];
-	mps[0] = -y;
-	mps[1] = y;
-	mps[2] = -x;
-	mps[3] = x;
+	mps[0] = -y + MOTOR_MID;
+	mps[1] = y + MOTOR_MID;
+	mps[2] = -x + MOTOR_MID;
+	mps[3] = x + MOTOR_MID;
 
 	motor_move(mps);
 }
