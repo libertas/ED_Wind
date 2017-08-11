@@ -659,7 +659,7 @@ void StartDefaultTask(void const * argument)
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, 1);
 	  osDelay(100);
 
-	  uint16_t data = resistor_get(2);
+	  uint16_t data = resistor_get(3);
 	  sl_send(0, 0, (uint8_t*)(&data), 2);
 
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, 1);
