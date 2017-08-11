@@ -722,7 +722,7 @@ void StartTasksTask(void const * argument)
 //
 //    move_to_hole(4);
 //
-//	osDelay(5000);
+	  osDelay(5000);
   }
   /* USER CODE END StartTasksTask */
 }
