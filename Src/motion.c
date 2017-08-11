@@ -78,6 +78,14 @@ void motor_control()
 
 	for(int i = 0; i < 4; i++) {
 		motor_heights[i] = resistor_get(i);
+		switch(i) {
+		case 0:
+		case 1:
+			motor_heights[i] *= 1.5f;
+			break;
+		default:
+			break;
+		}
 
 		motor_pids[i].actual_value = motor_heights[i];
 		motor_pids[i].set_value = motor_dest_heights[i];
