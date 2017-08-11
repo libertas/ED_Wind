@@ -729,12 +729,15 @@ void StartTasksTask(void const * argument)
 
 	  switch(task) {
 	  case '1':
+		  sl_send(2, 2, "Starting task 1", 16);
 		  motion_reset();
 		  osDelay(2000);
 		  move_to_pos(get_pos_x(), get_pos_y());
 		  motor_start();
 		  osDelay(6000);
 		  motion_reset();
+		  move_to_pos(320, 240);
+		  sl_send(2, 2, "Stopping task 1", 16);
 		  break;
 	  default:
 		  break;

@@ -215,17 +215,6 @@ void move_to_pos(uint16_t x, uint16_t y)
 	dest_y = y;
 }
 
-bool move_to_hole(uint8_t hole)
-{
-	if(!holes_available) {
-		return false;
-	}
-
-	move_to_pos(holes[hole][0], holes[hole][1]);
-
-	return true;
-}
-
 void l298n_set(uint32_t channel, float duty)
 {
 	const GPIO_TypeDef* port = GPIOE;
