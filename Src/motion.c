@@ -134,8 +134,9 @@ void motor_reset()
 void motor_move(float heights[4])
 {
 	for(int i = 0; i < 4; i++) {
-		if(fabsf(heights[i]) > MOTOR_LIMIT) {
-			heights[i] = heights[i] / fabsf(heights[i]) * MOTOR_LIMIT;
+		if(fabsf(heights[i] - MOTOR_MID) > MOTOR_LIMIT) {
+			heights[i] = MOTOR_MID\
+					+ heights[i] / fabsf(heights[i]) * MOTOR_LIMIT;
 		}
 		motor_dest_heights[i] = heights[i];
 	}
