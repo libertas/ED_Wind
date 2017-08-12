@@ -213,8 +213,8 @@ void motion_control()
 				py.ki = 0.03;
 				break;
 			case '3':
-				px.ki = 0.05;
-				py.ki = 0.05;
+				px.ki = 0.06;
+				py.ki = 0.06;
 				break;
 			case '2':
 			default:
@@ -230,8 +230,8 @@ void motion_control()
 				py.ki = 0.03;
 				break;
 			case '3':
-				px.ki = 0.01;
-				py.ki = 0.01;
+				px.ki = 0.04;
+				py.ki = 0.04;
 				break;
 			case '2':
 			default:

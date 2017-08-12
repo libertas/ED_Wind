@@ -764,19 +764,19 @@ void StartTasksTask(void const * argument)
 	  case '3':
 		  sl_send(2, 2, "Starting task 3", 16);
 
-		  move_to_pos(holes[3][0], holes[3][1]);
+		  move_to_pos(holes[3][0] - 20, holes[3][1]);
 		  motion_init_pid();
-		  px.kp = 4.0;
-		  px.kd = 4.0;
+		  px.kp = 4.5;
+		  px.kd = 0.5;
 
-		  py.kp = 5.0;
-		  py.kd = 5.0;
+		  py.kp = 4.5;
+		  py.kd = 0.5;
 
 		  motor_start();
 
 		  osDelay(11000);
 
-		  move_to_pos(holes[4][0], holes[4][1]);
+		  move_to_pos(holes[4][0] + 10, holes[4][1]);
 
 		  osDelay(8000);
 
