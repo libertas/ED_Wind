@@ -191,15 +191,12 @@ void motion_control()
 		x = 0;
 		y = 0;
 	} else {
-		if(fabsf(px.error) < 60 && fabsf(py.error) < 60) {
+		if(fabsf(px.error) < 35 && fabsf(py.error) < 35) {
 			px.ki = 0.01;
 			py.ki = 0.01;
-		} else if(fabsf(px.error) < 45 && fabsf(py.error) < 45) {
-			px.ki = 0.05;
-			py.ki = 0.05;
-		} else if(fabsf(px.error) < 25 && fabsf(py.error) < 25) {
-			px.ki = 0.01;
-			py.ki = 0.01;
+		} else if(fabsf(px.error) < 75 && fabsf(py.error) < 75) {
+			px.ki = 0.005;
+			py.ki = 0.005;
 		} else {
 			px.ki = 0;
 			py.ki = 0;
@@ -212,17 +209,6 @@ void motion_control()
 		py.actual_value = pos_y;
 		py.set_value = dest_y;
 		y = pid_realize(&py);
-
-		if(fabsf(px.error) < 60 && fabsf(py.error) < 60) {
-			x *= 1.5;
-			y *= 1.5;
-		} else if(fabsf(px.error) < 45 && fabsf(py.error) < 45) {
-			x *= 2.0;
-			y *= 2.0;
-		} else if(fabsf(px.error) < 25 && fabsf(py.error) < 25) {
-			x *= 2.5;
-			y *= 2.5;
-		}
 	}
 
 
