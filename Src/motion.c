@@ -57,11 +57,11 @@ void motion_init(TIM_HandleTypeDef *htim)
 
 	px.kp = 4.0;
 	px.ki = 0.0;
-	px.kd = 50.0;
+	px.kd = 5.0;
 
 	py.kp = 4.0;
 	py.ki = 0.0;
-	py.kd = 50.0;
+	py.kd = 5.0;
 
 	for(int i = 0; i < 4; i++) {
 		pid_config(&(motor_pids[i]));
@@ -191,6 +191,20 @@ void motion_control()
 		x = 0;
 		y = 0;
 	} else {
+		if(fabsf(px.error) < 60 && fabsf(py.error) < 60) {
+			px.ki = 0.01;
+			py.ki = 0.01;
+		} else if(fabsf(px.error) < 45 && fabsf(py.error) < 45) {
+			px.ki = 0.05;
+			py.ki = 0.05;
+		} else if(fabsf(px.error) < 25 && fabsf(py.error) < 25) {
+			px.ki = 0.01;
+			py.ki = 0.01;
+		} else {
+			px.ki = 0;
+			py.ki = 0;
+		}
+
 		px.actual_value = pos_x;
 		px.set_value = dest_x;
 		x = pid_realize(&px);
@@ -199,12 +213,15 @@ void motion_control()
 		py.set_value = dest_y;
 		y = pid_realize(&py);
 
-		if(px.error < 25) {
+		if(fabsf(px.error) < 60 && fabsf(py.error) < 60) {
 			x *= 1.5;
-		}
-
-		if(py.error < 25) {
 			y *= 1.5;
+		} else if(fabsf(px.error) < 45 && fabsf(py.error) < 45) {
+			x *= 2.0;
+			y *= 2.0;
+		} else if(fabsf(px.error) < 25 && fabsf(py.error) < 25) {
+			x *= 2.5;
+			y *= 2.5;
 		}
 	}
 

@@ -698,13 +698,14 @@ void StartControlTask(void const * argument)
   {
 	counter++;
 
-	if(counter >= 5) {
-		counter = 0;
-
-		/* Control the motors */
-		motor_control();
+	if(counter % 50 == 0) {
 		motion_control();
 	}
+
+	if(counter % 5 == 0) {
+		motor_control();
+	}
+
 	osDelay(1);
   }
 
