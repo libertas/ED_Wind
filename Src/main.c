@@ -744,10 +744,17 @@ void StartTasksTask(void const * argument)
 		  break;
 	  case '2':
 		  sl_send(2, 2, "Starting task 2", 16);
-		  move_to_pos(320, 240);
+
+		  move_to_pos(holes[8][0], holes[8][1]);
 		  motion_init_pid();
 		  motor_start();
-		  osDelay(15000);
+
+		  osDelay(500);
+
+		  move_to_pos(holes[4][0], holes[4][1]);
+
+		  osDelay(14000);
+
 		  motion_reset();
 		  move_to_pos(320, 240);
 		  sl_send(2, 2, "Stopping task 2", 16);
@@ -755,7 +762,7 @@ void StartTasksTask(void const * argument)
 	  case '3':
 		  sl_send(2, 2, "Starting task 3", 16);
 
-		  move_to_pos(holes[3][0], holes[3][1]);
+		  move_to_pos(holes[6][0], holes[6][1]);
 		  motion_init_pid();
 		  px.kp = 4;
 		  px.ki = 0.01;
@@ -766,9 +773,20 @@ void StartTasksTask(void const * argument)
 		  py.kd = 25;
 
 		  motor_start();
-		  osDelay(8000);
+
+		  osDelay(500);
+
+		  move_to_pos(holes[3][0], holes[3][1]);
+
+		  osDelay(7500);
 
 		  move_to_pos(holes[4][0], holes[4][1]);
+
+		  osDelay(2000);
+
+		  move_to_pos(holes[4][0], holes[4][1]);
+
+		  osDelay(8000);
 
 		  motion_reset();
 		  move_to_pos(320, 240);
@@ -777,12 +795,22 @@ void StartTasksTask(void const * argument)
 		  break;
 	  case '4':
 		  sl_send(2, 2, "Starting task 4", 16);
-		  move_to_pos(holes[8][0], holes[8][1]);
+
+		  move_to_pos(holes[4][0], holes[4][1]);
 		  motion_init_pid();
 		  motor_start();
-		  osDelay(15000);
+
+
+		  osDelay(3000);
+
+		  move_to_pos(holes[8][0], holes[8][1]);
+
+		  osDelay(12000);
+
 		  motion_reset();
 		  move_to_pos(320, 240);
+
+
 		  sl_send(2, 2, "Stopping task 4", 16);
 		  break;
 	  default:
