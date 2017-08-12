@@ -205,11 +205,11 @@ void motion_control()
 		y = 0;
 	} else {
 		if(fabsf(px.error) < 35 && fabsf(py.error) < 35) {
-			px.ki = 0.01;
-			py.ki = 0.01;
+			px.ki = 0.03;
+			py.ki = 0.03;
 		} else if(fabsf(px.error) < 75 && fabsf(py.error) < 75) {
-			px.ki = 0.005;
-			py.ki = 0.005;
+			px.ki = 0.02;
+			py.ki = 0.02;
 		} else {
 			px.ki = 0;
 			py.ki = 0;

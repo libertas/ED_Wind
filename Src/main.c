@@ -745,15 +745,17 @@ void StartTasksTask(void const * argument)
 	  case '2':
 		  sl_send(2, 2, "Starting task 2", 16);
 
-		  move_to_pos(holes[8][0], holes[8][1]);
+		  move_to_pos(holes[4][0], holes[4][1]);
 		  motion_init_pid();
+		  px.kp = 4.0;
+		  px.kd = 5.0;
+
+		  py.kp = 4.0;
+		  py.kd = 5.0;
+
 		  motor_start();
 
-		  osDelay(500);
-
-		  move_to_pos(holes[4][0], holes[4][1]);
-
-		  osDelay(14000);
+		  osDelay(15000);
 
 		  motion_reset();
 		  move_to_pos(320, 240);
@@ -762,27 +764,17 @@ void StartTasksTask(void const * argument)
 	  case '3':
 		  sl_send(2, 2, "Starting task 3", 16);
 
-		  move_to_pos(holes[6][0], holes[6][1]);
+		  move_to_pos(holes[3][0], holes[3][1]);
 		  motion_init_pid();
-		  px.kp = 4;
-		  px.ki = 0.01;
-		  px.kd = 25;
+		  px.kp = 4.0;
+		  px.kd = 4.0;
 
-		  py.kp = 4;
-		  py.ki = 0.01;
-		  py.kd = 25;
+		  py.kp = 4.0;
+		  py.kd = 4.0;
 
 		  motor_start();
 
-		  osDelay(500);
-
-		  move_to_pos(holes[3][0], holes[3][1]);
-
-		  osDelay(7500);
-
-		  move_to_pos(holes[4][0], holes[4][1]);
-
-		  osDelay(2000);
+		  osDelay(11000);
 
 		  move_to_pos(holes[4][0], holes[4][1]);
 
@@ -798,6 +790,12 @@ void StartTasksTask(void const * argument)
 
 		  move_to_pos(holes[4][0], holes[4][1]);
 		  motion_init_pid();
+		  px.kp = 3.0;
+		  px.kd = 2.0;
+
+		  py.kp = 3.0;
+		  py.kd = 2.0;
+
 		  motor_start();
 
 
