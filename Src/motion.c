@@ -208,9 +208,13 @@ void motion_control()
 
 		if(fabsf(px.error) < 40 && fabsf(py.error) < 40) {
 			switch(currentTask) {
-			case '3':
+			case '4':
 				px.ki = 0.03;
 				py.ki = 0.03;
+				break;
+			case '3':
+				px.ki = 0.05;
+				py.ki = 0.05;
 				break;
 			case '2':
 			default:
@@ -221,6 +225,10 @@ void motion_control()
 
 		} else if(fabsf(px.error) < 75 && fabsf(py.error) < 75) {
 			switch(currentTask) {
+			case '4':
+				px.ki = 0.03;
+				py.ki = 0.03;
+				break;
 			case '3':
 				px.ki = 0.01;
 				py.ki = 0.01;
