@@ -72,6 +72,18 @@ void motion_init_pid()
 
 void motion_init(TIM_HandleTypeDef *htim)
 {
+	holes[0][0] = 172; holes[0][1] = 94;
+	holes[1][0] = 316; holes[1][1] = 94;
+	holes[2][0] = 466; holes[2][1] = 94;
+
+	holes[3][0] = 176; holes[3][1] = 238;
+	holes[4][0] = 316; holes[4][1] = 238;
+	holes[5][0] = 458; holes[5][1] = 240;
+
+	holes[6][0] = 176; holes[6][1] = 380;
+	holes[7][0] = 318; holes[7][1] = 382;
+	holes[8][0] = 458; holes[8][1] = 382;
+
 	motion_htim = htim;
 
 	motion_init_pid();
