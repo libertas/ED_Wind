@@ -64,9 +64,9 @@ void motion_init_pid()
 	for(int i = 0; i < 4; i++) {
 		pid_config(&(motor_pids[i]));
 
-		motor_pids[i].kp = 0.05;
+		motor_pids[i].kp = 0.01;
 		motor_pids[i].ki = 0.0;
-		motor_pids[i].kd = 0.05;
+		motor_pids[i].kd = 0.01;
 	}
 }
 
@@ -204,12 +204,33 @@ void motion_control()
 		x = 0;
 		y = 0;
 	} else {
-		if(fabsf(px.error) < 35 && fabsf(py.error) < 35) {
-			px.ki = 0.03;
-			py.ki = 0.03;
+		extern char currentTask;
+
+		if(fabsf(px.error) < 40 && fabsf(py.error) < 40) {
+			switch(currentTask) {
+			case '3':
+				px.ki = 0.03;
+				py.ki = 0.03;
+				break;
+			case '2':
+			default:
+				px.ki = 0.02;
+				py.ki = 0.02;
+				break;
+			}
+
 		} else if(fabsf(px.error) < 75 && fabsf(py.error) < 75) {
-			px.ki = 0.02;
-			py.ki = 0.02;
+			switch(currentTask) {
+			case '3':
+				px.ki = 0.01;
+				py.ki = 0.01;
+				break;
+			case '2':
+			default:
+				px.ki = 0.02;
+				py.ki = 0.02;
+				break;
+			}
 		} else {
 			px.ki = 0;
 			py.ki = 0;

@@ -747,10 +747,10 @@ void StartTasksTask(void const * argument)
 
 		  move_to_pos(holes[4][0], holes[4][1]);
 		  motion_init_pid();
-		  px.kp = 4.0;
+		  px.kp = 4.5;
 		  px.kd = 5.0;
 
-		  py.kp = 4.0;
+		  py.kp = 4.5;
 		  py.kd = 5.0;
 
 		  motor_start();
@@ -769,8 +769,8 @@ void StartTasksTask(void const * argument)
 		  px.kp = 4.0;
 		  px.kd = 4.0;
 
-		  py.kp = 4.0;
-		  py.kd = 4.0;
+		  py.kp = 5.0;
+		  py.kd = 5.0;
 
 		  motor_start();
 
