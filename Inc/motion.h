@@ -23,6 +23,7 @@ uint16_t get_pos_x();
 uint16_t get_pos_y();
 
 void motion_init(TIM_HandleTypeDef *htim);
+void motion_init_pid();
 
 void motor_control();
 void motor_start();

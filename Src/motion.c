@@ -48,10 +48,8 @@ uint16_t get_pos_y()
 	return pos_y;
 }
 
-void motion_init(TIM_HandleTypeDef *htim)
+void motion_init_pid()
 {
-	motion_htim = htim;
-
 	pid_config(&px);
 	pid_config(&py);
 
@@ -70,6 +68,13 @@ void motion_init(TIM_HandleTypeDef *htim)
 		motor_pids[i].ki = 0.0;
 		motor_pids[i].kd = 0.05;
 	}
+}
+
+void motion_init(TIM_HandleTypeDef *htim)
+{
+	motion_htim = htim;
+
+	motion_init_pid();
 
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(motion_htim, TIM_CHANNEL_2);

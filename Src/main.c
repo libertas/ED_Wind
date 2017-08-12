@@ -742,8 +742,8 @@ void StartTasksTask(void const * argument)
 		  break;
 	  case '2':
 		  sl_send(2, 2, "Starting task 2", 16);
-		  move_to_pos(get_pos_x() + holes[4][0] - holes[0][0],\
-				  get_pos_y() + holes[4][1] - holes[0][1]);
+		  move_to_pos(320, 240);
+		  motion_init_pid();
 		  motor_start();
 		  osDelay(15000);
 		  motion_reset();
@@ -752,12 +752,24 @@ void StartTasksTask(void const * argument)
 		  break;
 	  case '3':
 		  sl_send(2, 2, "Starting task 3", 16);
-		  move_to_pos(500, 350);
+		  move_to_pos(get_pos_x() + holes[3][0] - holes[0][0],\
+				  get_pos_y() + holes[3][1] - holes[0][1]);
+		  motion_init_pid();
 		  motor_start();
-		  osDelay(20000);
+		  osDelay(15000);
 		  motion_reset();
 		  move_to_pos(320, 240);
 		  sl_send(2, 2, "Stopping task 3", 16);
+		  break;
+	  case '4':
+		  sl_send(2, 2, "Starting task 4", 16);
+		  move_to_pos(holes[8][0], holes[8][1]);
+		  motion_init_pid();
+		  motor_start();
+		  osDelay(15000);
+		  motion_reset();
+		  move_to_pos(320, 240);
+		  sl_send(2, 2, "Stopping task 4", 16);
 		  break;
 	  default:
 		  break;
