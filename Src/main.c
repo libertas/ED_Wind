@@ -808,8 +808,10 @@ void StartTasksTask(void const * argument)
 		  sl_send(2, 2, "Stopping task 4", 16);
 		  break;
 	  case '5':
+		  break;
+	  case '6':
 
-		  sl_send(2, 2, "Starting task 5", 16);
+		  sl_send(2, 2, "Starting task 6", 16);
 
 		  move_to_pos(holes[3][0], holes[3][1]);
 		  motion_init_pid();
@@ -847,10 +849,8 @@ void StartTasksTask(void const * argument)
 		  move_to_pos(320, 240);
 
 
-		  sl_send(2, 2, "Stopping task 5", 16);
+		  sl_send(2, 2, "Stopping task 6", 16);
 
-		  break;
-	  case '6':
 		  break;
 	  default:
 		  break;
