@@ -212,6 +212,10 @@ void motion_control()
 				px.ki = 0.0;
 				py.ki = 0.0;
 				break;
+			case '5':
+				px.ki = 0.0;
+				py.ki = 0.0;
+				break;
 			case '4':
 				px.ki = 0.005;
 				py.ki = 0.005;
@@ -230,6 +234,10 @@ void motion_control()
 		} else if(fabsf(px.error) < 75 && fabsf(py.error) < 75) {
 			switch(currentTask) {
 			case '6':
+				px.ki = 0.0;
+				py.ki = 0.0;
+				break;
+			case '5':
 				px.ki = 0.0;
 				py.ki = 0.0;
 				break;

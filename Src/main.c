@@ -808,6 +808,47 @@ void StartTasksTask(void const * argument)
 		  sl_send(2, 2, "Stopping task 4", 16);
 		  break;
 	  case '5':
+		  sl_send(2, 2, "Starting task 5", 16);
+
+		  move_to_pos(holes[0][0], holes[0][1]);
+		  motion_init_pid();
+		  px.kp = 3.5;
+		  px.kd = 1.5;
+
+		  py.kp = 3.5;
+		  py.kd = 1.5;
+
+		  motor_start();
+
+		  move_to_pos(holes[1][0], holes[1][1] - 40);
+
+		  osDelay(6000);
+
+		  px.kp = 3.5;
+		  px.kd = 2.5;
+
+		  py.kp = 3.5;
+		  py.kd = 2.5;
+
+		  move_to_pos(holes[5][0] + 10, holes[5][1] - 10);
+
+		  osDelay(6000);
+
+		  px.kp = 1.5;
+		  px.kd = 1.5;
+
+		  py.kp = 4.0;
+		  py.kd = 3.5;
+
+		  move_to_pos(holes[8][0], holes[8][1]);
+
+		  osDelay(6000);
+
+		  motion_reset();
+		  move_to_pos(320, 240);
+
+
+		  sl_send(2, 2, "Stopping task 5", 16);
 		  break;
 	  case '6':
 
