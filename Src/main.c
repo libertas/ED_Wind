@@ -893,6 +893,41 @@ void StartTasksTask(void const * argument)
 		  sl_send(2, 2, "Stopping task 6", 16);
 
 		  break;
+	  case '7':
+
+		  sl_send(2, 2, "Starting task 7", 16);
+
+		  move_to_pos(holes[3][0], holes[3][1]);
+		  motion_init_pid();
+		  px.kp = 3.5;
+		  px.kd = 2.5;
+
+		  py.kp = 3.5;
+		  py.kd = 2.5;
+
+		  motor_start();
+
+		  for(int i = 0; i < 10; i++) {
+			  move_to_pos(holes[1][0], holes[1][1] + 20);
+			  osDelay(2000);
+
+			  move_to_pos(holes[5][0] - 20, holes[5][1]);
+			  osDelay(2000);
+
+			  move_to_pos(holes[7][0], holes[7][1] - 20);
+			  osDelay(2000);
+
+			  move_to_pos(holes[3][0] + 20, holes[3][1]);
+			  osDelay(2000);
+		  }
+
+		  motion_reset();
+		  move_to_pos(320, 240);
+
+
+		  sl_send(2, 2, "Stopping task 7", 16);
+
+		  break;
 	  default:
 		  break;
 	  }
