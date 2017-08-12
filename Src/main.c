@@ -730,6 +730,8 @@ void StartTasksTask(void const * argument)
 
 	  osMutexRelease(task_lockHandle);
 
+	  extern mypid_t px, py;
+
 	  switch(task) {
 	  case '1':
 		  sl_send(2, 2, "Starting task 1", 16);
@@ -752,13 +754,25 @@ void StartTasksTask(void const * argument)
 		  break;
 	  case '3':
 		  sl_send(2, 2, "Starting task 3", 16);
-		  move_to_pos(get_pos_x() + holes[3][0] - holes[0][0],\
-				  get_pos_y() + holes[3][1] - holes[0][1]);
+
+		  move_to_pos(holes[3][0], holes[3][1]);
 		  motion_init_pid();
+		  px.kp = 4;
+		  px.ki = 0.01;
+		  px.kd = 25;
+
+		  py.kp = 4;
+		  py.ki = 0.01;
+		  py.kd = 25;
+
 		  motor_start();
-		  osDelay(15000);
+		  osDelay(8000);
+
+		  move_to_pos(holes[4][0], holes[4][1]);
+
 		  motion_reset();
 		  move_to_pos(320, 240);
+
 		  sl_send(2, 2, "Stopping task 3", 16);
 		  break;
 	  case '4':
